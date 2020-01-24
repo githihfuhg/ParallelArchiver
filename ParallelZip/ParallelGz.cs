@@ -467,6 +467,7 @@ namespace ParallelArhive
         {
             var result = (float)(FileLength / NumberOfCores) / portionLenght;
             return DegreeOfParallelism = (result % 10 == 0 || result < 1) ? (int)result + 1 : (int)result;
+
         }
 
     }
