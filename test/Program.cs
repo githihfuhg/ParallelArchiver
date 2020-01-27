@@ -58,8 +58,8 @@ namespace test
             {
                 //parallelGz.CompressFile(path, $"{path}.gz", PqzCompressionLevel.Optimal);
                 //parallelGz.CreateTar($"{Path}.tar", Path);
-                parallelGz.CompressDirectory(path, $"{path}.mar", PqzCompressionLevel.Optimal);
-                //parallelGz.Decompress(path, path.Substring(0, path.LastIndexOf(Path.DirectorySeparatorChar)));
+                //parallelGz.CompressDirectory(path, $"{path}.mar", PqzCompressionLevel.Optimal);
+                parallelGz.Decompress(path, path.Substring(0, path.LastIndexOf(Path.DirectorySeparatorChar)));
             });
             GC.Collect();
             timer.Stop();

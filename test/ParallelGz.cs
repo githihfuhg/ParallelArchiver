@@ -23,8 +23,7 @@ namespace test
         private long NumberOfFiles = 0;
         public int DegreeOfParallelism = 45;
 
-        //public delegate void AccountHandler(float pozition, float lenght);
-
+       
         public event Action<string, int, int> Progress;
 
         public void CompressFile(string input, string result, PqzCompressionLevel compressL)
@@ -74,7 +73,7 @@ namespace test
             return type;
         }
 
-        public void Decompress(string inputFile, string outputDir)
+        public void Decompress(string inputFile, string outputDir, IEnumerable<string> fileName = null, IEnumerable<string> fileExtension = null)
         {
             var timer = new Stopwatch();
             timer.Start();
@@ -84,7 +83,10 @@ namespace test
                 if (Type(read) == "dir")
                 {
                     CreateDir(read, outputDir);
-                    ParallelCreateFiles(read, outputDir);
+                    //ParallelCreateFiles(read, outputDir);
+
+
+                    ParallelCreateFiles(read, outputDir, new[] { ".txt", ".docx" });
                     //CreateFiles(read, outputDir);
                 }
                 else
@@ -93,6 +95,7 @@ namespace test
                 }
 
             }
+
             GC.Collect();
             timer.Stop();
             var time = timer.ElapsedMilliseconds;
@@ -112,52 +115,42 @@ namespace test
             }
         }
 
-        public void ParallelCreateFiles(FileStream read, string outputDir)
+        public void ParallelCreateFiles(FileStream read, string outputDir, IEnumerable<string> fileName = null, IEnumerable<string> fileExtension = null)
         {
             var title = new Title(read);
-            var titles = title.GetTitleFiles().Values.ToArray();
-
+            var  titles = new List<TFile>();
+            var allTitles = title.GetTitleFiles();
             var timer = new Stopwatch();
             timer.Start();
-            //Parallel.ForEach(titles, (titl) =>
-            //{
-            //    var fullDir = Path.Combine(outputDir, titl.FileName);
 
-            //    using (FileStream create = File.Open(fullDir, FileMode.OpenOrCreate, FileAccess.Write))
-            //    {
-            //        if (titl.BlockCount != 0)
-            //        {
-            //            for (int i = 0; i < titl.BlockCount; i++)
-            //            {
-            //                ParallelDecompressBlock(read, titl.PositionInTheStream, create);
-            //            }
+            if (fileName != null)
+            {
+                titles = fileName.SelectMany(file => allTitles.Where(title =>
+                    title.FileName.Contains(file))).ToList();
+            }
 
-            //        }
-            //        else
-            //        {
-            //            ParallelDecompressBlock(read, titl.PositionInTheStream, create, titl.FileLength);
-            //        }
-            //    }
+            if (fileExtension != null)
+            {
+                titles.AddRange(fileExtension.SelectMany(ext =>
+                    allTitles.Where(title =>
+                        title.FileName.Substring(title.FileName.Length - ext.Length) == ext && !titles.Contains(title))));
+            }
 
+            if (fileExtension == null && fileName == null)
+            {
+                titles = allTitles;
+            }
 
-            //Parallel.ForEach(titles, (t) =>
-            //{
-            //    var fullDir = Path.Combine(outputDir, t.FileName);
-            //    using (FileStream create = File.Open(fullDir, FileMode.OpenOrCreate, FileAccess.Write))
-            //    {
-            //        if (t.BlockCount != 0)
-            //        {
-                       
-            //                DecompressBigFile(read, create, t.PositionInTheStream, t.BlockCount);
-                        
-                       
-            //        }
-            //        else
-            //        {
-            //            DecompressSmallFile(read, create, t);
-            //        }
-            //    }
-            //});
+            //titles = (fileExtension == null && fileName == null) ? allTitles :
+            //    (fileName != null) ? titles = fileName.SelectMany(file => allTitles.Where(title =>
+            //        title.FileName.Contains(file))).ToList() : fileExtension.SelectMany(ext =>
+            //        allTitles.Where(title =>
+            //            title.FileName.Substring(title.FileName.Length - ext.Length) == ext &&
+            //            !titles.Contains(title))).ToList();
+
+            //titles = fileName?.SelectMany(file => t.Where(title =>
+            //    title.FileName.Contains(file))).ToList() ?? titles;
+
 
             var task = titles.Select(t => Task.Run(() =>
             {
@@ -175,14 +168,12 @@ namespace test
                 }
             })).ToArray();
             Task.WaitAll(task);
-            var time = timer.ElapsedMilliseconds;
-            timer.Stop();
+
 
         }
 
         private void DecompressBigFile(FileStream read, FileStream create, long PositionInTheStream, int blockCount)
         {
-            var a = blockCount;
             lock (read)
             {
                 byte[] data;
@@ -213,7 +204,7 @@ namespace test
         }
 
 
-        private void DecompressSmallFile(FileStream read, FileStream create, Title title)
+        private void DecompressSmallFile(FileStream read, FileStream create, TFile title)
         {
             var data = new byte[title.FileLength];
             lock (read)
@@ -227,7 +218,7 @@ namespace test
             {
                 resultStream.CopyTo(create);
             }
-           
+
         }
 
 
@@ -239,43 +230,41 @@ namespace test
             {
                 var fullDir = Path.Combine(outputDir, t.FileName);
                 Directory.CreateDirectory(Path.GetDirectoryName(fullDir));
-
             }
             timer.Stop();
             var time = timer.ElapsedMilliseconds;
 
         }
 
-        private void CreateFiles(FileStream read, string outputDir)
-        {
-            var title = new Title(read);
+        //private void CreateFiles(FileStream read, string outputDir)
+        //{
+        //    var title = new Title(read);
 
-            while (read.Position < read.Length)
-            {
-                title = title.GetTitleFile(/*read*/);
-                var fullDir = Path.Combine(outputDir, title.FileName);
-                //using (FileStream create = File.Create(fullDir))
-                //{
-                using (FileStream create = File.Open(fullDir, FileMode.OpenOrCreate, FileAccess.Write))
-                {
-                    if (title.BlockCount != 0)
-                    {
-                        for (int i = 0; i < title.BlockCount; i++)
-                        {
-                            DecompressBlock(read, create);
-                        }
+        //    while (read.Position < read.Length)
+        //    {
+        //        title = title.GetTitleFile(/*read*/);
+        //        var fullDir = Path.Combine(outputDir, title.FileName);
+        //        //using (FileStream create = File.Create(fullDir))
+        //        //{
+        //        using (FileStream create = File.Open(fullDir, FileMode.OpenOrCreate, FileAccess.Write))
+        //        {
+        //            if (title.BlockCount != 0)
+        //            {
+        //                for (int i = 0; i < title.BlockCount; i++)
+        //                {
+        //                    DecompressBlock(read, create);
+        //                }
 
-                    }
-                    else
-                    {
-                        DecompressBlock(read, create, title.FileLength);
-                    }
-                }
+        //            }
+        //            else
+        //            {
+        //                DecompressBlock(read, create, title.FileLength);
+        //            }
+        //        }
 
-                //}
-            }
+        //    }
 
-        }
+        //}
         private void CompressBigFile(FileInfo fileInfo, FileStream create, PqzCompressionLevel compressL)
         {
             var sizeBlock = BalancingBlocks(fileInfo.Length, SetDegreeOfParallelism(fileInfo.Length));
@@ -384,10 +373,6 @@ namespace test
                 {
                     readFile.Read(Bufer);
                 }
-                //using (var readFile = file.OpenRead())
-                //{
-                //    readFile.Read(Bufer);
-                //}
 
                 var CompressFile = CompressBlock(Bufer, compressL);
 
@@ -461,6 +446,7 @@ namespace test
             Counter = 0;
             var time = timer.ElapsedMilliseconds;
         }
+       
 
         private int SetDegreeOfParallelism(long FileLength, int portionLenght = 4718592)
         {
