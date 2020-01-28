@@ -186,11 +186,17 @@ namespace test
         }
         private byte[] CompressBlock(byte[] data, PqzCompressionLevel copressL)
         {
-            using var compressedStream = new MemoryStream();
-            using var zipStream = new GZipStream(compressedStream, (CompressionLevel)copressL);
-            zipStream.Write(data, 0, data.Length);
-            zipStream.Close();
-            return compressedStream.ToArray();
+            using (var compressedStream = new MemoryStream())
+            {
+                using (var zipStream = new GZipStream(compressedStream, (CompressionLevel) copressL))
+                {
+                    zipStream.Write(data, 0, data.Length);
+                    zipStream.Close();
+                    return compressedStream.ToArray();
+                } 
+            }
+            
+           
         }
         private long[] BalancingBlocks(long fileLength, int blockCount)
         {

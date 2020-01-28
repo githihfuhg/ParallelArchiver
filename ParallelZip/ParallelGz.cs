@@ -222,12 +222,19 @@ namespace ParallelArhive
                 read.Position = title.PositionInTheStream;
                 read.Read(data,0,data.Length);
             }
-            using var decompressedStream = new MemoryStream(data);
-            using var resultStream = new GZipStream(decompressedStream, CompressionMode.Decompress);
-            lock (create)
+
+            using (var decompressedStream = new MemoryStream(data))
             {
-                resultStream.CopyTo(create);
-            }
+                using (var resultStream = new GZipStream(decompressedStream, CompressionMode.Decompress))
+                {
+                    lock (create)
+                    {
+                        resultStream.CopyTo(create);
+                    }
+                } 
+               
+            } 
+           
 
         }
 
@@ -348,9 +355,15 @@ namespace ParallelArhive
                 data = new byte[fileLength];
                 read.Read(data,0,data.Length);
             }
-            using var decompressedStream = new MemoryStream(data);
-            using var resultStream = new GZipStream(decompressedStream, CompressionMode.Decompress);
-            resultStream.CopyTo(create);
+            using (var decompressedStream = new MemoryStream(data))
+            {
+                using (var resultStream = new GZipStream(decompressedStream, CompressionMode.Decompress))
+                {
+                    resultStream.CopyTo(create);
+                }
+            }
+           
+          
 
         }
 

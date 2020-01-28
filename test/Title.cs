@@ -234,8 +234,8 @@ namespace test
             var titleDirectories = new TDirectories[DirCount];
             for (var i = 0; i < DirCount; i++)
             {
-                try
-                {
+                //try
+                //{
                     bufer = new byte[4];
                     Stream.Read(bufer);
                     var filePathLength = BitConverter.ToInt32(bufer);
@@ -243,11 +243,11 @@ namespace test
                     Stream.Read(bufer, 0, filePathLength);
                     var fileName = Encoding.UTF8.GetString(bufer);
                     titleDirectories[i] = new TDirectories(filePathLength,fileName);
-                }
-                catch
-                {
+                //}
+                //catch
+                //{
 
-                } /* new Title(){FilePathLength = FilePathLength,FileName = FileName};*/
+                //} /* new Title(){FilePathLength = FilePathLength,FileName = FileName};*/
             }
             return titleDirectories;
         }

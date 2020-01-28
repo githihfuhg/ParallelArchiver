@@ -128,11 +128,14 @@ namespace test
                     read.Read(data, 8, data.Length - 8);
                     using (var decompressedStream = new MemoryStream(data))
                     {
-                        using var resultStream = new GZipStream(decompressedStream, CompressionMode.Decompress);
-                        lock (create)
+                        using (var resultStream = new GZipStream(decompressedStream, CompressionMode.Decompress))
                         {
-                            resultStream.CopyTo(create);
-                        }
+                            lock (create)
+                            {
+                                resultStream.CopyTo(create);
+                            }
+                        } 
+                       
                     }
                     counter = (blockCount != 0) ? counter + 1 : read.Position;
                 }
@@ -171,13 +174,19 @@ namespace test
                 read.Position = title.PositionInTheStream;
                 read.Read(data);
             }
-            using var decompressedStream = new MemoryStream(data);
-            using var resultStream = new GZipStream(decompressedStream, CompressionMode.Decompress);
-            lock (create)
-            {
-                resultStream.CopyTo(create);
-            }
 
+            using (var decompressedStream = new MemoryStream(data))
+            {
+                using (var resultStream = new GZipStream(decompressedStream, CompressionMode.Decompress))
+                {
+                    lock (create)
+                    {
+                        resultStream.CopyTo(create);
+                    }
+                }
+
+            } 
+            
         }
 
 
