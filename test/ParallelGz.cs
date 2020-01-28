@@ -23,9 +23,7 @@ namespace test
         private long NumberOfFiles = 0;
         public int DegreeOfParallelism = 45;
 
-       
         public event Action<string, int, int> Progress;
-
         public void CompressFile(string input, string result, PqzCompressionLevel compressL)
         {
             using (FileStream create = File.Create(result))

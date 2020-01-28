@@ -11,6 +11,11 @@ namespace test
 {
     internal class DecompressArchive
     {
+        private ParallelArchiverEvents PAEvents;
+        //public DecompressArchive(ParallelArchiverEvents paEvents)
+        //{
+        //    PAEvents = paEvents;
+        //}
         public void Decompress(string inputFile, string outputDir, IEnumerable<string> fileExtension = null, IEnumerable<string> fileName = null)
         {
             var timer = new Stopwatch();

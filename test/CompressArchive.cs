@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
@@ -8,14 +9,20 @@ using System.Threading.Tasks;
 
 namespace test
 {
-    class CompressArchive
+    public class CompressArchive : ParallelArchiverEvents
     {
         private readonly int NumberOfCores = Environment.ProcessorCount;
         private long Counter = 0;
         private long NumberOfFiles = 0;
         public int DegreeOfParallelism = 45;
+        private ParallelArchiverEvents PAEvents;
 
-        private event Action<string, int, int> Progress;
+        //private event Action<string, int, int> Progress;
+
+        //public CompressArchive(ParallelArchiverEvents paEvent)
+        //{
+        //    PAEvents = paEvent;
+        //}
 
 
         public void CompressFile(string input, string result, PqzCompressionLevel compressL)
@@ -25,7 +32,6 @@ namespace test
                 CompressBigFile(new FileInfo(input), create, compressL);
             }
             GC.Collect();
-
         }
 
         public void CompressDirectory(string inputDir, string outputDir, PqzCompressionLevel compressL)
@@ -96,11 +102,13 @@ namespace test
                         if (NumberOfFiles > 1)
                         {
                             var fullProgress = (int)(Counter * 100 / NumberOfFiles);
-                            Progress?.Invoke(read.Name, progressFile, fullProgress);
+                            //Progress?.Invoke(read.Name, progressFile, fullProgress);
+                            AddProgressFile(read.Name, progressFile, fullProgress);
                         }
                         else
                         {
-                            Progress?.Invoke(read.Name, progressFile, progressFile);
+                            //Progress?.Invoke(read.Name, progressFile, progressFile);
+                          AddProgressFile(read.Name, progressFile, progressFile);
                         }
                         return bytes;
 
@@ -146,7 +154,8 @@ namespace test
                     title.AddTitleFile(mainDir, file.FullName, CompressFile.Length);
                     create.Write(CompressFile);
                     var fullProgress = (int)(Counter * 100 / NumberOfFiles);
-                    Progress?.Invoke(file.Name, 100, fullProgress);
+                    //PAEvents.Progress?.Invoke(file.Name, 100, fullProgress);
+                    AddProgressFile(file.Name, 100, fullProgress);
                     Counter++;
                 }
 
