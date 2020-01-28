@@ -67,7 +67,7 @@ namespace test
                 //parallelGz.CompressDirectory(path, $"{path}.mar", PqzCompressionLevel.Optimal);
                 //parallelGz.Decompress(path, path.Substring(0, path.LastIndexOf(Path.DirectorySeparatorChar)));
 
-                ParallelArchiver.CompressDirectory(path, $"{path}.mar", PqzCompressionLevel.Optimal, Notif);
+                ParallelArchiver.CompressDirectory(path, $"{path}.mar", PqzCompressionLevel.Optimal, EventHandler);
 
             });
             GC.Collect();
@@ -76,7 +76,7 @@ namespace test
             Console.WriteLine(time);
         }
 
-        private static async void Notif(string fileName, int progressFile, int fullProgress)
+        private static void EventHandler(string fileName, int progressFile, int fullProgress)
         {
            // await Task.Run(() =>
            //{
@@ -89,10 +89,6 @@ namespace test
            //});
             //Progress.Add($"{fileName} - {progressFile}% */  Полный прогресс - {fullProgress}%");
              Console.WriteLine($"{fileName} - {progressFile}% */  Полный прогресс - {fullProgress}%");
-            //Console.WriteLine();
-
-            //Console.Write($"{fileName} - {progressFile}% */  Полный прогресс - {fullProgress}%");
-            //Console.SetCursorPosition(0, 0);
         }
 
     }

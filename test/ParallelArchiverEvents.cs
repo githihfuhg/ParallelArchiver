@@ -12,5 +12,6 @@ namespace test
         {
             Progress?.Invoke(name, progressFile, fullProgress);
         }
+        // еще тут будет логика вычисления значений, передаваемых оработчику
     }
 }

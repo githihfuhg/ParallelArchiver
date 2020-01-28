@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace test
 {
-    internal class DecompressArchive
+    internal class DecompressArchive:ParallelArchiverEvents
     {
         private ParallelArchiverEvents PAEvents;
         //public DecompressArchive(ParallelArchiverEvents paEvents)
