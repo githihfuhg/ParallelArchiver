@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Threading.Tasks;
 //using SharpCompress.
 
@@ -60,9 +61,9 @@ namespace test
                 //parallelGz.CreateTar($"{Path}.tar", Path);
                 //parallelGz.CompressDirectory(path, $"{path}.mar", PqzCompressionLevel.Optimal);
                 //parallelGz.Decompress(path, path.Substring(0, path.LastIndexOf(Path.DirectorySeparatorChar)));
-                ////ParallelArchiver.CompressFile(path, $"{path}.mar", PqzCompressionLevel.Optimal/*, EventHandler*/);
-                ParallelArchiver.CompressDirectory(path, $"{path}.mar", PqzCompressionLevel.Optimal, EventHandler);
-                //ParallelArchiver.Decompress(path, path.Substring(0, path.LastIndexOf(Path.DirectorySeparatorChar)),/*new []{".pdf"},*/ progressHandler: EventHandler);
+                //ParallelArchiver.CompressFile(path, $"{path}.mar", PqzCompressionLevel.Optimal/*, EventHandler*/);
+                //ParallelArchiver.CompressDirectory(path, $"{path}.mar", PqzCompressionLevel.Optimal/*, EventHandler*/);
+                ParallelArchiver.Decompress(path, path.Substring(0, path.LastIndexOf(Path.DirectorySeparatorChar))/*new []{".pdf"},*/ /*progressHandler: EventHandler*/);
 
             });
             GC.Collect();
@@ -73,15 +74,12 @@ namespace test
 
         private static async void EventHandler(string fileName, int progressFile, int fullProgress)
         {
-            await Task.Run(() =>
-           {
-               //parallelGz.CompressFile(path, $"{path}.gz", PqzCompressionLevel.Optimal);
-               //parallelGz.CreateTar($"{Path}.tar", Path);
-               //parallelGz.CompressDirectory(path, $"{path}.mar", PqzCompressionLevel.Optimal);
-               //parallelGz.Decompress(path, path.Substring(0, path.LastIndexOf(Path.DirectorySeparatorChar)));
+           // await Task.Run(() =>
+           //{
+              
                Console.WriteLine($"{fileName} - {progressFile}% */  Полный прогресс - {fullProgress}%");
 
-           });
+           //});
             //Progress.Add($"{fileName} - {progressFile}% */  Полный прогресс - {fullProgress}%");
             //Console.WriteLine($"{fileName} - {progressFile}% */  Полный прогресс - {fullProgress}%");
         }

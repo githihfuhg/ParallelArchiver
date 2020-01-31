@@ -6,8 +6,15 @@ using System.IO.Compression;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace test
+namespace ParallelZip
 {
+    public enum PqzCompressionLevel
+    {
+        Optimal,
+        Fastest,
+        NoCompression,
+    }
+
     internal class CompressArchive : ParallelArchiverEvents
     {
         private readonly int NumberOfCores = Environment.ProcessorCount;

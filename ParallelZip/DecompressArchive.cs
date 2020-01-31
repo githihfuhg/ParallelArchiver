@@ -7,7 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace test
+namespace ParallelZip
 {
     internal class DecompressArchive : ParallelArchiverEvents
     {
