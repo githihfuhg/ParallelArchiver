@@ -1,22 +1,16 @@
 ﻿using System;
-using System.Buffers;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
-using System.IO.Compression;
-using System.Linq;
-using System.Runtime.InteropServices;
-using System.Text;
 using System.Threading.Tasks;
 //using SharpCompress.
 
 namespace test
 {
-   
+
 
     class Program
     {
-        private static List <string > Progress = new List<string>();
+        private static List<string> Progress = new List<string>();
 
         static void Main(string[] args)
         {
@@ -30,7 +24,7 @@ namespace test
 
             try
             {
-                
+
                 Async(Console.ReadLine());
 
             }
@@ -40,7 +34,7 @@ namespace test
             }
             timer.Stop();
             var time = timer.ElapsedMilliseconds;
-           
+
             //Console.WriteLine(time);
             Console.ReadKey();
 
@@ -66,8 +60,9 @@ namespace test
                 //parallelGz.CreateTar($"{Path}.tar", Path);
                 //parallelGz.CompressDirectory(path, $"{path}.mar", PqzCompressionLevel.Optimal);
                 //parallelGz.Decompress(path, path.Substring(0, path.LastIndexOf(Path.DirectorySeparatorChar)));
-
+                ////ParallelArchiver.CompressFile(path, $"{path}.mar", PqzCompressionLevel.Optimal/*, EventHandler*/);
                 ParallelArchiver.CompressDirectory(path, $"{path}.mar", PqzCompressionLevel.Optimal, EventHandler);
+                //ParallelArchiver.Decompress(path, path.Substring(0, path.LastIndexOf(Path.DirectorySeparatorChar)),/*new []{".pdf"},*/ progressHandler: EventHandler);
 
             });
             GC.Collect();
@@ -76,23 +71,23 @@ namespace test
             Console.WriteLine(time);
         }
 
-        private static void EventHandler(string fileName, int progressFile, int fullProgress)
+        private static async void EventHandler(string fileName, int progressFile, int fullProgress)
         {
-           // await Task.Run(() =>
-           //{
-           //    //parallelGz.CompressFile(path, $"{path}.gz", PqzCompressionLevel.Optimal);
-           //    //parallelGz.CreateTar($"{Path}.tar", Path);
-           //    //parallelGz.CompressDirectory(path, $"{path}.mar", PqzCompressionLevel.Optimal);
-           //    //parallelGz.Decompress(path, path.Substring(0, path.LastIndexOf(Path.DirectorySeparatorChar)));
-           //    Console.WriteLine($"{fileName} - {progressFile}% */  Полный прогресс - {fullProgress}%");
+            await Task.Run(() =>
+           {
+               //parallelGz.CompressFile(path, $"{path}.gz", PqzCompressionLevel.Optimal);
+               //parallelGz.CreateTar($"{Path}.tar", Path);
+               //parallelGz.CompressDirectory(path, $"{path}.mar", PqzCompressionLevel.Optimal);
+               //parallelGz.Decompress(path, path.Substring(0, path.LastIndexOf(Path.DirectorySeparatorChar)));
+               Console.WriteLine($"{fileName} - {progressFile}% */  Полный прогресс - {fullProgress}%");
 
-           //});
+           });
             //Progress.Add($"{fileName} - {progressFile}% */  Полный прогресс - {fullProgress}%");
-             Console.WriteLine($"{fileName} - {progressFile}% */  Полный прогресс - {fullProgress}%");
+            //Console.WriteLine($"{fileName} - {progressFile}% */  Полный прогресс - {fullProgress}%");
         }
 
     }
 
-    
+
 
 }

@@ -124,14 +124,14 @@ namespace test
             if (fileName != null)
             {
                 titles = fileName.SelectMany(file => allTitles.Where(title =>
-                    title.FileName.Contains(file))).ToList();
+                    title.FullName.Contains(file))).ToList();
             }
 
             if (fileExtension != null)
             {
                 titles.AddRange(fileExtension.SelectMany(ext =>
                     allTitles.Where(title =>
-                        title.FileName.Substring(title.FileName.Length - ext.Length) == ext && !titles.Contains(title))));
+                        title.FullName.Substring(title.FullName.Length - ext.Length) == ext && !titles.Contains(title))));
             }
 
             if (fileExtension == null && fileName == null)
@@ -152,7 +152,7 @@ namespace test
 
             var task = titles.Select(t => Task.Run(() =>
             {
-                var fullDir = Path.Combine(outputDir, t.FileName);
+                var fullDir = Path.Combine(outputDir, t.FullName);
                 using (FileStream create = File.Open(fullDir, FileMode.OpenOrCreate, FileAccess.Write))
                 {
                     if (t.BlockCount != 0)

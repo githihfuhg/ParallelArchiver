@@ -6,9 +6,6 @@ namespace test
 {
     public static class ParallelArchiver
     {
-        //static public ParallelArchiverEvents ParallelArchiverEvents = new ParallelArchiverEvents();
-
-        //static public CompressArchive compress = new CompressArchive();
         public static void CompressFile(string input, string result, PqzCompressionLevel compressL, Action<string, int, int> progressHandler = null)
         {
             var compressArch = new CompressArchive();

@@ -172,26 +172,12 @@ namespace test
     //}
     internal class Title
     {
-        //public int FilePathLength { get; private set; } = 0;
-        //public string FileName { get; private set; } = "";
-        //public long FileLength { get; private set; } = 0;
-        //public long PositionInTheStream { get; private set; } = 0;
-        //public int BlockCount { get; private set; } = 0;
-
 
         private FileStream Stream;
         public Title(FileStream stream)
         {
             Stream = stream;
         }
-        //private Title(Title title)
-        //{
-        //    FilePathLength = title.FilePathLength;
-        //    FileName = title.FileName;
-        //    FileLength = title.FileLength;
-        //    PositionInTheStream = title.PositionInTheStream;
-        //    BlockCount = title.BlockCount;
-        //}
 
         public void AddTitleDirectories(DirectoryInfo mainDir)
         {
@@ -210,11 +196,11 @@ namespace test
                 Stream.Write(fileNameByte);
             }
         }
-        public void AddTitleFile(DirectoryInfo mainDir, string fullName, long fileLenght, int blockCount = 0)
+        public void AddTitleFile(DirectoryInfo mainDir, string fullName, long fileLenght, int blockCount = 0, bool isBiFile = false)
         {
             //var FileName = Path.Combine(mainDir.Name, fullName.Replace($"{mainDir.FullName}\\", ""));
             var fileNameByte = Encoding.UTF8.GetBytes(Path.Combine(mainDir.Name, fullName.Replace($"{mainDir.FullName}\\", "")));
-            var FileLength = (fileLenght >= 52428800) ? 0 : fileLenght;
+            var FileLength = (isBiFile) ? 0 : fileLenght;
             Stream.Write(BitConverter.GetBytes(fileNameByte.Length));
             Stream.Write(fileNameByte);
             Stream.Write(BitConverter.GetBytes(FileLength));
@@ -234,45 +220,56 @@ namespace test
             var titleDirectories = new TDirectories[DirCount];
             for (var i = 0; i < DirCount; i++)
             {
-                //try
-                //{
-                    bufer = new byte[4];
-                    Stream.Read(bufer);
-                    var filePathLength = BitConverter.ToInt32(bufer);
-                    bufer = new byte[filePathLength];
-                    Stream.Read(bufer, 0, filePathLength);
-                    var fileName = Encoding.UTF8.GetString(bufer);
-                    titleDirectories[i] = new TDirectories(filePathLength,fileName);
-                //}
-                //catch
-                //{
-
-                //} /* new Title(){FilePathLength = FilePathLength,FileName = FileName};*/
+                bufer = new byte[4];
+                Stream.Read(bufer);
+                var filePathLength = BitConverter.ToInt32(bufer);
+                bufer = new byte[filePathLength];
+                Stream.Read(bufer, 0, filePathLength);
+                var fileName = Encoding.UTF8.GetString(bufer);
+                titleDirectories[i] = new TDirectories(filePathLength, fileName);
             }
             return titleDirectories;
         }
 
         public TFile GetTitleFile(/*FileStream stream*/)
         {
-            var BlockCount = 0;
+            var blockCount = 0;
+            long positionInTheStream;
             var buffer = new byte[4];
+            var blockLength = new long[0];
             Stream.Read(buffer);
-            var FilePathLength = BitConverter.ToInt32(buffer);
-            buffer = new byte[FilePathLength];
+            var filePathLength = BitConverter.ToInt32(buffer);
+            buffer = new byte[filePathLength];
             Stream.Read(buffer);
-            var FileName = Encoding.UTF8.GetString(buffer);
+            var fullName = Encoding.UTF8.GetString(buffer);
             buffer = new byte[8];
             Stream.Read(buffer);
-            var FileLength = BitConverter.ToInt64(buffer);
-            if (FileLength == 0)
+            var fileLength = BitConverter.ToInt64(buffer);
+            if (fileLength == 0)
             {
                 Stream.Read(buffer, 0, 4);
-                BlockCount = BitConverter.ToInt32(buffer);
-            }
-            Stream.Read(buffer);
-            var PositionInTheStream = BitConverter.ToInt64(buffer);
+                blockCount = BitConverter.ToInt32(buffer);
+                Stream.Read(buffer);
 
-            return new TFile(FilePathLength,FileName,FileLength,PositionInTheStream,BlockCount);
+                positionInTheStream = BitConverter.ToInt64(buffer);
+                blockLength = new long[blockCount];
+
+                for (int i = 0; i < blockCount; i++)
+                {
+                    Stream.Read(buffer);
+                    blockLength[i] = BitConverter.ToInt32(buffer, 4);
+                    fileLength += blockLength[i];
+                    Stream.Seek(blockLength[i] - 8, SeekOrigin.Current);
+                }
+            }
+            else
+            {
+                positionInTheStream = BitConverter.ToInt64(buffer);
+                Stream.Seek(fileLength, SeekOrigin.Current);
+            }
+
+
+            return new TFile(filePathLength, fullName,fullName.Substring(fullName.LastIndexOf('\\')+1),fileLength, positionInTheStream, blockCount, blockLength);
         }
 
         public List<TFile> GetTitleFiles()
@@ -283,69 +280,74 @@ namespace test
             //830516399
             while (Stream.Position < Stream.Length)
             {
+                long positionInTheStream;
                 var BlockCount = 0;
+                var blockLength = new long[0];
                 var buffer = new byte[4];
                 Stream.Read(buffer);
-                var FilePathLength = BitConverter.ToInt32(buffer);
-                buffer = new byte[FilePathLength];
+                var filePathLength = BitConverter.ToInt32(buffer);
+                buffer = new byte[filePathLength];
                 Stream.Read(buffer);
-                var FileName = Encoding.UTF8.GetString(buffer);
+                var fullName = Encoding.UTF8.GetString(buffer);
                 buffer = new byte[8];
                 Stream.Read(buffer);
-                var FileLength = BitConverter.ToInt64(buffer);
-                if (FileLength == 0)
+                var fileLength = BitConverter.ToInt64(buffer);
+                if (fileLength == 0)
                 {
                     Stream.Read(buffer, 0, 4);
                     BlockCount = BitConverter.ToInt32(buffer);
-                }
 
-                Stream.Read(buffer);
-                var PositionInTheStream = BitConverter.ToInt64(buffer);
+                    Stream.Read(buffer);
+                    positionInTheStream = BitConverter.ToInt64(buffer);
 
-                if (FileLength == 0)
-                {
+                    blockLength = new long[BlockCount];
                     for (int i = 0; i < BlockCount; i++)
                     {
-                        var Buffer = new byte[8];
-                        Stream.Read(Buffer);
-                        var blockLength = BitConverter.ToInt32(Buffer, 4);
-                        Stream.Seek(blockLength - 8, SeekOrigin.Current);
-                    }
 
+                        
+                        Stream.Read(buffer);
+                        blockLength[i] = BitConverter.ToInt32(buffer, 4);
+                        fileLength += blockLength[i];
+                        Stream.Seek(blockLength[i] - 8, SeekOrigin.Current);
+                    }
                 }
                 else
                 {
-                    Stream.Seek(FileLength, SeekOrigin.Current);
+                    Stream.Read(buffer);
+                    positionInTheStream = BitConverter.ToInt64(buffer);
+                    Stream.Seek(fileLength, SeekOrigin.Current);
                 }
 
-
-                titleFiles.Add(new TFile(FilePathLength, FileName, FileLength, PositionInTheStream, BlockCount));
+                titleFiles.Add(new TFile(filePathLength, fullName, fullName.Substring(fullName.LastIndexOf('\\')+1), fileLength, positionInTheStream, BlockCount, blockLength));
             }
             //Stream.Seek(-Stream.Length, SeekOrigin.Current);
             Stream.Position = poz;
             return titleFiles;
         }
-
-
     }
-
+    //U:\test\Новая папкаq\123.mar
+    //U:\test\Новая папкаq\прог.tar.mar
     internal class TFile
     {
-      
-        public int FilePathLength { get; private set; }
-        public string FileName { get; private set; }
-        public long FileLength { get; private set; }
-        public long PositionInTheStream { get; private set; }
-        public int BlockCount { get; private set; } 
+
+        public int FilePathLength { get; }
+        public string FullName { get; }
+        public string Name { get; }
+        public long FileLength { get; }
+        public long PositionInTheStream { get; }
+        public int BlockCount { get; }
+        public long[] BlockLength { get; }
 
 
-        public TFile(int filePathLength, string fileName, long fileLength, long positionInTheStream, int blockCount)
+        public TFile(int filePathLength, string fulleName,string name, long fileLength, long positionInTheStream, int blockCount, long[] blockLength)
         {
             FilePathLength = filePathLength;
-            FileName = fileName;
+            FullName = fulleName;
+            Name = name;
             FileLength = fileLength;
             PositionInTheStream = positionInTheStream;
             BlockCount = blockCount;
+            BlockLength = blockLength;
         }
 
 
