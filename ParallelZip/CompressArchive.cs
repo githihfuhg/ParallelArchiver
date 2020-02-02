@@ -130,7 +130,7 @@ namespace ParallelZip
 
                 using (FileStream readFile = file.Open(FileMode.Open, FileAccess.Read))
                 {
-                    readFile.Read(buffer,0,buffer.Length);
+                    readFile.Read(buffer, 0, buffer.Length);
                 }
 
                 var CompressFile = CompressBlock(buffer, compressL);
@@ -138,7 +138,7 @@ namespace ParallelZip
                 lock (ResultStream)
                 {
                     Title.AddTitleFile(MainDir, file.FullName, CompressFile.Length);
-                    ResultStream.Write(CompressFile,0,CompressFile.Length);
+                    ResultStream.Write(CompressFile, 0, CompressFile.Length);
                     AddProgressFile(file.Name, file.Length);
                 }
 
@@ -157,8 +157,21 @@ namespace ParallelZip
                     return compressedStream.ToArray();
                 }
             }
-
         }
+
+        //private byte[] CompressByte()
+        //{
+        //    BrotliStream
+        //    using (var compressedStream = new MemoryStream())
+        //    {
+        //        using (var zipStream = new BrotliStream))
+        //        {
+        //            zipStream.Write(data, 0, data.Length);
+        //            zipStream.Close();
+        //            return compressedStream.ToArray();
+        //        }
+        //    }
+        //}
         private long[] BalancingBlocks(long fileLength, int blockCount)
         {
 

@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 //using SharpCompress.
 
@@ -20,7 +22,6 @@ namespace test
             //Console.ReadLine();
             Console.WriteLine("Введите путь в файлу для его архивации");
             Console.WriteLine(@"C:\Users\Win10Pro\Desktop\raar\test.mar");
-            var parallelGz = new ParallelGz();
 
 
             try
@@ -48,7 +49,6 @@ namespace test
         {
             var timer = new Stopwatch();
             timer.Start();
-            var parallelGz = new ParallelGz();
             //parallelGz.Progress += Notif;
             //ParallelArchiver.ParallelArchiverEvents.Progress += Notif;
 
@@ -61,9 +61,9 @@ namespace test
                 //parallelGz.CreateTar($"{Path}.tar", Path);
                 //parallelGz.CompressDirectory(path, $"{path}.mar", PqzCompressionLevel.Optimal);
                 //parallelGz.Decompress(path, path.Substring(0, path.LastIndexOf(Path.DirectorySeparatorChar)));
-                //ParallelArchiver.CompressFile(path, $"{path}.mar", PqzCompressionLevel.Optimal/*, EventHandler*/);
+                //ParallelArchiver.CompressFile(path, $"{path}.mar", PqzCompressionLevel.Optimal, EventHandler);
                 //ParallelArchiver.CompressDirectory(path, $"{path}.mar", PqzCompressionLevel.Optimal/*, EventHandler*/);
-                ParallelArchiver.Decompress(path, path.Substring(0, path.LastIndexOf(Path.DirectorySeparatorChar))/*new []{".pdf"},*/ /*progressHandler: EventHandler*/);
+                ParallelArchiver.Decompress(path, path.Substring(0, path.LastIndexOf(Path.DirectorySeparatorChar)),/*new[] { ".pdf" },*/  progressHandler: EventHandler);
 
             });
             GC.Collect();
@@ -76,7 +76,7 @@ namespace test
         {
            // await Task.Run(() =>
            //{
-              
+
                Console.WriteLine($"{fileName} - {progressFile}% */  Полный прогресс - {fullProgress}%");
 
            //});
@@ -84,8 +84,18 @@ namespace test
             //Console.WriteLine($"{fileName} - {progressFile}% */  Полный прогресс - {fullProgress}%");
         }
 
+
+        public static void Text()
+        {
+
+            string a = "";
+
+            File.WriteAllText(@"C:\Users\Ярослав\Desktop\Extension.txt",
+                Regex.Matches(File.ReadAllText(@"C:\Users\Ярослав\Desktop\123.txt"), @"\.\w+\s")
+                    .Select(txt => a += $"\"{txt.Value}\",").ToArray()[^1].Replace(" ",""));
+
+            
+        }
     }
-
-
 
 }

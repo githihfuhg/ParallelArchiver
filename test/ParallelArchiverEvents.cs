@@ -10,11 +10,11 @@ namespace test
       internal class ParallelArchiverEvents
       {
         public event Action<string, int, int> Progress;
-        protected long NumberOfFiles = 0;
-        private long AllFilesLength = 0;
-        private long Counter = 0;
-        private int ProgressFile = 0;
-        private int FullProgress = 0;
+        protected long NumberOfFiles { get; set; } = 0;
+        private long AllFilesLength { get; set; } = 0;
+        private long Counter { get; set; } = 0;
+        private int ProgressFile { get; set; } = 0;
+        private int FullProgress { get; set; } = 0;
 
         protected void AddProgressFile(string name,long blockLength, long streamReadLength = 0, long streamReadPosition = 0)
         {
@@ -26,7 +26,8 @@ namespace test
         
         protected void Start(IEnumerable<FileInfo> fileInfo)
         {
-            AllFilesLength = fileInfo.Select(path => path.Length).Sum();
+            AllFilesLength = fileInfo.Select(path => 
+                path.Length).Sum();
             Counter = 0;
         }
         protected void Start(IEnumerable<TFile> tFile)
