@@ -63,8 +63,12 @@ namespace test
                 //parallelGz.Decompress(path, path.Substring(0, path.LastIndexOf(Path.DirectorySeparatorChar)));
                 //ParallelArchiver.CompressFile(path, $"{path}.mar", PqzCompressionLevel.Optimal, EventHandler);
                 //ParallelArchiver.CompressDirectory(path, $"{path}.mar", PqzCompressionLevel.Optimal/*, EventHandler*/);
-                ParallelArchiver.Decompress(path, path.Substring(0, path.LastIndexOf(Path.DirectorySeparatorChar)),/*new[] { ".pdf" },*/  progressHandler: EventHandler);
 
+
+                //var a = path.Substring(0, path.LastIndexOf(Path.DirectorySeparatorChar));
+                //var b = Path.GetDirectoryName(path);
+                ParallelArchiver.Decompress(path,Path.GetDirectoryName(path),/*new[] { ".pdf" },*/  progressHandler: EventHandler);
+                
             });
             GC.Collect();
             timer.Stop();

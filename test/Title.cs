@@ -18,10 +18,9 @@ namespace test
 
         public void AddTitleDirectories(DirectoryInfo mainDir,bool oneFile = false)
         {
-            var directories = (oneFile) ? new List<DirectoryInfo>() : mainDir.EnumerateDirectories("*", SearchOption.AllDirectories).ToList();
+            var directories =/* (oneFile) ? new List<DirectoryInfo>() :*/ mainDir.EnumerateDirectories("*", SearchOption.AllDirectories).ToList();
             directories.Add(mainDir);
-            var type = (oneFile) ? "fil" : "dir";
-            Stream.Write(Encoding.UTF8.GetBytes(type), 0, 3);
+            Stream.Write(Encoding.UTF8.GetBytes("dir"), 0, 3);
             Stream.Seek(8, SeekOrigin.Current);
             Stream.Write(BitConverter.GetBytes(directories.Count()), 0, 4);
             foreach (var dir in directories)
@@ -103,11 +102,16 @@ namespace test
 
         //    return new TFile(filePathLength, fullName, fullName.Substring(fullName.LastIndexOf('\\') + 1), fileLength, positionInTheStream, blockCount, blockLength);
         //}
-        public void AddTitleFile(DirectoryInfo mainDir, string fullName, long fileLenght, int blockCount = 0, bool isBiFile = false)
+        public void AddTitleFile(DirectoryInfo mainDir, string fullName, long fileLenght,bool IsCompressFile, int blockCount = 0, bool bigFile = false)
         {
             //var FileName = Path.Combine(mainDir.Name, fullName.Replace($"{mainDir.FullName}\\", ""));
+            if (IsCompressFile)
+            {
+                Stream.Write(Encoding.UTF8.GetBytes("fil"), 0, 3);
+                Stream.Write(BitConverter.GetBytes(Stream.Position + 8),0,8);
+            }
             var fileNameByte = Encoding.UTF8.GetBytes(Path.Combine(mainDir.Name, fullName.Replace($"{mainDir.FullName}\\", "")));
-            var FileLength = (isBiFile) ? 0 : fileLenght;
+            var FileLength = (bigFile) ? 0 : fileLenght;
             Stream.Write(BitConverter.GetBytes(fileNameByte.Length), 0, 4);
             Stream.Write(fileNameByte, 0, fileNameByte.Length);
             Stream.Write(BitConverter.GetBytes(FileLength), 0, 8);

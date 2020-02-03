@@ -76,7 +76,7 @@ namespace test
             var task = titles.Select(t => Task.Run(() =>
             {
                 var fullDir = (isOneFiele || fileName!= null || fileExtension!=null) ? Path.Combine(OutputDir, t.Name) : Path.Combine(OutputDir, t.FullName);
-                using (FileStream create = File.Open(fullDir, FileMode.OpenOrCreate, FileAccess.Write))
+                using (var create = File.Open(fullDir, FileMode.OpenOrCreate, FileAccess.Write))
                 {
 
                     if (t.BlockCount != 0)
@@ -189,7 +189,7 @@ namespace test
         //}
         private string[] Extension =
         {
-            ".doc",".docx",".1st",".602",".abw",".act",".adoc",".aim",".ans",
+            ".1st",".602",".abw",".act",".adoc",".aim",".ans",
             ".asc",".asc",".ase",".awp",".aww",".bad",".bbs",".bdp",".bdr",
             ".bean",".bib",".bib",".bibtex",".bml",".bna",".boc",".brx",".btd",
             ".bzabw",".calca",".charset",".chord",".cnm",".cod",".crwl",".cws",

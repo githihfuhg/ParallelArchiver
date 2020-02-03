@@ -24,6 +24,7 @@ namespace test
         private FileStream ResultStream { get; set; }
         private PqzCompressionLevel CompressL { get; set; }
         private bool StrongTxtCompression { get; set; }
+        private bool IsCompressFile { get; set; }
 
         public void CompressFile(string input, string result, PqzCompressionLevel compressL)
         {
@@ -34,8 +35,9 @@ namespace test
                 ResultStream = resultStream;
                 Title = new Title(resultStream);
                 CompressL = compressL;
-                 Title.AddTitleDirectories(MainDir,true);
+                IsCompressFile = true;
                 AddFile(fileInfo);
+
             }
             GC.Collect();
         }
@@ -50,8 +52,9 @@ namespace test
             {
                 ResultStream = resultStream;
                 Title = new Title(resultStream);
-                Title.AddTitleDirectories(MainDir);
                 CompressL = compressL;
+                IsCompressFile = false;
+                Title.AddTitleDirectories(MainDir);
                 AddFile();
             }
             GC.Collect();
@@ -63,9 +66,10 @@ namespace test
             var timer = new Stopwatch();
             timer.Start();
             List<FileInfo> SmallFile = new List<FileInfo>();
-            var pathFile = (fileInfo == null) ?
+            FileInfo[] pathFile = (!IsCompressFile) ?
                 MainDir.EnumerateFiles("*", SearchOption.AllDirectories).ToArray() :
-                new [] { fileInfo };
+                new[] { fileInfo };
+
 
             Start(pathFile);
             //NumberOfFiles = pathFile.Length;
@@ -89,7 +93,9 @@ namespace test
         private void CompressBigFile(FileInfo fileInfo)
         {
             var sizeBlock = BalancingBlocks(fileInfo.Length, SetDegreeOfParallelism(fileInfo.Length));
-            Title.AddTitleFile(MainDir, fileInfo.FullName, fileInfo.Length, DegreeOfParallelism * NumberOfCores, true);
+            Title.AddTitleFile(MainDir, fileInfo.FullName, fileInfo.Length, IsCompressFile, DegreeOfParallelism * NumberOfCores, true);
+
+
             using (var read = fileInfo.OpenRead())
             {
                 for (int i = 0; i < DegreeOfParallelism; i++)
@@ -142,7 +148,7 @@ namespace test
 
                 lock (ResultStream)
                 {
-                    Title.AddTitleFile(MainDir, file.FullName, CompressFile.Length);
+                    Title.AddTitleFile(MainDir, file.FullName, CompressFile.Length,IsCompressFile);
                     ResultStream.Write(CompressFile, 0, CompressFile.Length);
                     AddProgressFile(file.Name, file.Length);
                 }
@@ -186,7 +192,6 @@ namespace test
 
         private long[] BalancingBlocks(long fileLength, int blockCount)
         {
-
             var blocks = Enumerable.Range(0, blockCount).Select(x => fileLength / blockCount).ToArray();
             var Sum = blocks.Sum();
             if (Sum != fileLength)
