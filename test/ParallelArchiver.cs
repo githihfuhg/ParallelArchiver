@@ -7,42 +7,42 @@ namespace test
     public static class ParallelArchiver
     {
 
-        public static void CompressFile(string input, string result, PqzCompressionLevel compressL, Action<string, int, int> progressHandler = null)
+        public static void CompressFile(string input, string result, PqzCompressionLevel compressL, Action<string, int, int> progressHandler = null, bool maximumTxtCompression = false)
         {
             var compressArch = new CompressArchive();
             compressArch.Progress += progressHandler;
-            compressArch.CompressFile(input, result, compressL);
+            compressArch.CompressFile(input, result, compressL, maximumTxtCompression);
             compressArch.Progress -= progressHandler;
             GC.Collect();
         }
-        public static async void CompressFileAsync(string input, string result, PqzCompressionLevel compressL, Action<string, int, int> progressHandler = null)
+        public static async void CompressFileAsync(string input, string result, PqzCompressionLevel compressL, Action<string, int, int> progressHandler = null, bool maximumTxtCompression = false)
         {
             await Task.Run(() =>
             {
                 var compressArch = new CompressArchive();
                 compressArch.Progress += progressHandler;
-                compressArch.CompressFile(input, result, compressL);
+                compressArch.CompressFile(input, result, compressL, maximumTxtCompression);
                 compressArch.Progress -= progressHandler;
 
             });
             GC.Collect();
         }
 
-        public static  void CompressDirectory(string inputDir, string outputDir, PqzCompressionLevel compressL, Action<string, int, int> progressHandler = null)
+        public static void CompressDirectory(string inputDir, string outputDir, PqzCompressionLevel compressL, Action<string, int, int> progressHandler = null, bool maximumTxtCompression = false)
         {
             var compressArch = new CompressArchive();
             compressArch.Progress += progressHandler;
-            compressArch.CompressDirectory(inputDir, outputDir, compressL);
+            compressArch.CompressDirectory(inputDir, outputDir, compressL, maximumTxtCompression);
             compressArch.Progress -= progressHandler;
             GC.Collect();
         }
-        public static async void CompressDirectoryAsync(string inputDir, string outputDir, PqzCompressionLevel compressL, Action<string, int, int> progressHandler = null)
+        public static async void CompressDirectoryAsync(string inputDir, string outputDir, PqzCompressionLevel compressL, Action<string, int, int> progressHandler = null, bool maximumTxtCompression = false)
         {
             await Task.Run(() =>
             {
                 var compressArch = new CompressArchive();
                 compressArch.Progress += progressHandler;
-                compressArch.CompressDirectory(inputDir, outputDir, compressL);
+                compressArch.CompressDirectory(inputDir, outputDir, compressL, maximumTxtCompression);
                 compressArch.Progress -= progressHandler;
             });
             GC.Collect();

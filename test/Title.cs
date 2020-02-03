@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.IO.Compression;
 using System.Linq;
 using System.Text;
 
@@ -102,25 +103,48 @@ namespace test
 
         //    return new TFile(filePathLength, fullName, fullName.Substring(fullName.LastIndexOf('\\') + 1), fileLength, positionInTheStream, blockCount, blockLength);
         //}
-        public void AddTitleFile(DirectoryInfo mainDir, string fullName, long fileLenght,bool IsCompressFile, int blockCount = 0, bool bigFile = false)
+        //public void AddTitleFile(DirectoryInfo mainDir, string typeCompression ,bool IsCompressFile, string fullName,long fileLength = 0, int blockCount = 0/*,*//* bool bigFile = false*/)
+        //{
+        //    //var FileName = Path.Combine(mainDir.Name, fullName.Replace($"{mainDir.FullName}\\", ""));
+        //    if (IsCompressFile)
+        //    {
+        //        Stream.Write(Encoding.UTF8.GetBytes("fil"), 0, 3);
+        //        Stream.Write(BitConverter.GetBytes(Stream.Position + 8),0,8);
+        //    }
+        //    Stream.Write(Encoding.UTF8.GetBytes(typeCompression), 0, 2);
+        //    var fileNameByte = Encoding.UTF8.GetBytes(Path.Combine(mainDir.Name,fullName.Replace($"{mainDir.FullName}\\", "")));
+        //    var FileLength = fileLength;/*(fileLength==0) ? 0 : fileLength;*/
+        //    Stream.Write(BitConverter.GetBytes(fileNameByte.Length), 0, 4);
+        //    Stream.Write(fileNameByte, 0, fileNameByte.Length);
+        //    Stream.Write(BitConverter.GetBytes(FileLength), 0, 8);
+        //    if (fileLength == 0)
+        //    {
+        //        Stream.Write(BitConverter.GetBytes(blockCount), 0, 4);
+        //    }
+        //    Stream.Write(BitConverter.GetBytes(Stream.Position + 8), 0, 8);
+        //}
+
+        public void AddTitleFile(DirectoryInfo mainDir,bool IsCompressFile,TFile tFile)
         {
             //var FileName = Path.Combine(mainDir.Name, fullName.Replace($"{mainDir.FullName}\\", ""));
             if (IsCompressFile)
             {
                 Stream.Write(Encoding.UTF8.GetBytes("fil"), 0, 3);
-                Stream.Write(BitConverter.GetBytes(Stream.Position + 8),0,8);
+                Stream.Write(BitConverter.GetBytes(Stream.Position + 8), 0, 8);
             }
-            var fileNameByte = Encoding.UTF8.GetBytes(Path.Combine(mainDir.Name, fullName.Replace($"{mainDir.FullName}\\", "")));
-            var FileLength = (bigFile) ? 0 : fileLenght;
+            Stream.Write(Encoding.UTF8.GetBytes(tFile.TypeСompression), 0, 2);
+            var fileNameByte = Encoding.UTF8.GetBytes(Path.Combine(mainDir.Name, tFile.FullName.Replace($"{mainDir.FullName}\\", "")));
             Stream.Write(BitConverter.GetBytes(fileNameByte.Length), 0, 4);
             Stream.Write(fileNameByte, 0, fileNameByte.Length);
-            Stream.Write(BitConverter.GetBytes(FileLength), 0, 8);
-            if (FileLength == 0)
+            Stream.Write(BitConverter.GetBytes(tFile.FileLength), 0, 8);
+            if (tFile.FileLength == 0)
             {
-                Stream.Write(BitConverter.GetBytes(blockCount), 0, 4);
+                Stream.Write(BitConverter.GetBytes(tFile.BlockCount), 0, 4);
             }
             Stream.Write(BitConverter.GetBytes(Stream.Position + 8), 0, 8);
         }
+
+
 
 
         public List<TFile> GetTitleFiles()
@@ -134,8 +158,10 @@ namespace test
             {
                 long positionInTheStream;
                 var BlockCount = 0;
-                var blockLength = new long[0];
+                var blockLength = new int[0];
                 buffer = new byte[4];
+                Stream.Read(buffer, 0, 2);
+                var typeCompression = Encoding.UTF8.GetString(buffer,0,2);
                 Stream.Read(buffer, 0, 4);
                 var filePathLength = BitConverter.ToInt32(buffer, 0);
                 buffer = new byte[filePathLength];
@@ -151,14 +177,19 @@ namespace test
 
                     Stream.Read(buffer, 0, 8);
                     positionInTheStream = BitConverter.ToInt64(buffer, 0);
-
-                    blockLength = new long[BlockCount];
+                    blockLength = new int [BlockCount];
                     for (int i = 0; i < BlockCount; i++)
                     {
-                        Stream.Read(buffer, 0, 8);
-                        blockLength[i] = BitConverter.ToInt32(buffer, 4);
+
+                        Stream.Read(buffer, 0, 4);
+                        blockLength[i] = BitConverter.ToInt32(buffer, 0);
                         fileLength += blockLength[i];
-                        Stream.Seek(blockLength[i] - 8, SeekOrigin.Current);
+                        Stream.Seek(blockLength[i] , SeekOrigin.Current);
+
+                        //Stream.Read(buffer, 0, 8);
+                        //blockLength[i] = BitConverter.ToInt32(buffer, 4);
+                        //fileLength += blockLength[i];
+                        //Stream.Seek(blockLength[i] - 8, SeekOrigin.Current);
                     }
                 }
                 else
@@ -167,32 +198,48 @@ namespace test
                     positionInTheStream = BitConverter.ToInt64(buffer, 0);
                     Stream.Seek(fileLength, SeekOrigin.Current);
                 }
-                titleFiles.Add(new TFile(filePathLength, fullName, fullName.Substring(fullName.LastIndexOf('\\') + 1), fileLength, positionInTheStream, BlockCount, blockLength));
+                titleFiles.Add(new TFile(typeCompression,filePathLength, fullName, fullName.Substring(fullName.LastIndexOf('\\') + 1), fileLength, positionInTheStream, BlockCount, blockLength));
             }
             return titleFiles;
         }
     }
     internal class TFile
     {
-
+        public string TypeСompression { get;}
         public int FilePathLength { get; }
         public string FullName { get; }
         public string Name { get; }
         public long FileLength { get; }
         public long PositionInTheStream { get; }
         public int BlockCount { get; }
-        public long[] BlockLength { get; }
+        public int[] BlockLength { get; }
 
 
-        public TFile(int filePathLength, string fulleName, string name, long fileLength, long positionInTheStream, int blockCount, long[] blockLength)
+        public TFile(string typeCompression,int filePathLength, string fullName, string name, long fileLength, long positionInTheStream, int blockCount, int[] blockLength)
         {
+            TypeСompression = typeCompression;
             FilePathLength = filePathLength;
-            FullName = fulleName;
+            FullName = fullName;
             Name = name;
             FileLength = fileLength;
             PositionInTheStream = positionInTheStream;
             BlockCount = blockCount;
             BlockLength = blockLength;
+        }
+
+        public TFile(string typeCompression, long fileLength, string fullName)
+        {
+            TypeСompression = typeCompression;
+            FullName = fullName;
+            FileLength = fileLength;
+            BlockCount = 0;
+        }
+        public TFile(string typeCompression, string fullName, int blockCount)
+        {
+            TypeСompression = typeCompression;
+            FileLength = 0;
+            FullName = fullName;
+            BlockCount = blockCount;
         }
 
     }

@@ -28,7 +28,7 @@ namespace test
                 {
                     ParallelCreateFiles(false, fileExtension, fileName);
                 }
-                else if(Type() == "fil")
+                else if (Type() == "fil")
                 {
                     ParallelCreateFiles();
                 }
@@ -75,7 +75,7 @@ namespace test
             Start(titles);
             var task = titles.Select(t => Task.Run(() =>
             {
-                var fullDir = (isOneFiele || fileName!= null || fileExtension!=null) ? Path.Combine(OutputDir, t.Name) : Path.Combine(OutputDir, t.FullName);
+                var fullDir = (isOneFiele || fileName != null || fileExtension != null) ? Path.Combine(OutputDir, t.Name) : Path.Combine(OutputDir, t.FullName);
                 using (var create = File.Open(fullDir, FileMode.OpenOrCreate, FileAccess.Write))
                 {
 
@@ -100,7 +100,7 @@ namespace test
         {
             byte[] data;
             //var pozition = tfile.PositionInTheStream;
-            for (long i = 0, pozEvent = 0,pozition = tfile.PositionInTheStream; i < tfile.BlockCount; i++)
+            for (long i = 0, pozEvent = 0, pozition = tfile.PositionInTheStream + 4; i < tfile.BlockCount; i++)
             {
                 lock (Read)
                 {
@@ -108,8 +108,30 @@ namespace test
                     data = new byte[tfile.BlockLength[i]];
                     Read.Read(data, 0, data.Length);
                 }
+                DecompreesBlock(create, data, tfile.TypeСompression);
+                pozition += tfile.BlockLength[i] + 4;
+                pozEvent += tfile.BlockLength[i];
+                AddProgressFile(tfile.Name, tfile.BlockLength[i], tfile.FileLength, pozEvent);
 
-                using (var decompressedStream = new MemoryStream(data))
+            }
+        }
+        private void DecompressSmallFile(FileStream create, TFile tfile)
+        {
+            var data = new byte[tfile.FileLength];
+            lock (Read)
+            {
+                Read.Position = tfile.PositionInTheStream;
+                Read.Read(data, 0, data.Length);
+            }
+            DecompreesBlock(create, data, tfile.TypeСompression);
+            AddProgressFile(tfile.Name, tfile.FileLength);
+        }
+
+        private void DecompreesBlock(FileStream create, byte[] data, string typeCompression)
+        {
+            using (var decompressedStream = new MemoryStream(data))
+            {
+                if (typeCompression == "gz")
                 {
                     using (var resultStream = new GZipStream(decompressedStream, CompressionMode.Decompress))
                     {
@@ -118,37 +140,18 @@ namespace test
                             resultStream.CopyTo(create);
                         }
                     }
-                    pozition += tfile.BlockLength[i];
-                    pozEvent += tfile.BlockLength[i];
-                    AddProgressFile(tfile.Name, tfile.BlockLength[i], tfile.FileLength, pozEvent);
                 }
-
-            }
-        }
-
-        private void DecompressSmallFile(FileStream create, TFile title)
-        {
-            var data = new byte[title.FileLength];
-            lock (Read)
-            {
-                Read.Position = title.PositionInTheStream;
-                Read.Read(data,0,data.Length);
-            }
-
-            AddProgressFile(title.Name, title.FileLength);
-
-            using (var decompressedStream = new MemoryStream(data))
-            {
-                using (var resultStream = new GZipStream(decompressedStream, CompressionMode.Decompress))
+                else if (typeCompression == "br")
                 {
-                    lock (create)
+                    using (var resultStream = new BrotliStream(decompressedStream, CompressionMode.Decompress))
                     {
-                        resultStream.CopyTo(create);
+                        lock (create)
+                        {
+                            resultStream.CopyTo(create);
+                        }
                     }
                 }
-
             }
-
         }
 
         private void CreateDir()
@@ -168,7 +171,7 @@ namespace test
         {
             string type;
             var buffer = new byte[3];
-            Read.Read(buffer,0,buffer.Length);
+            Read.Read(buffer, 0, buffer.Length);
             Read.Seek(-3, SeekOrigin.Current);
             try
             {
@@ -182,45 +185,8 @@ namespace test
 
             return type;
         }
-        //private bool IsText(string Name)
-        //{
-        //    string e = Path.GetExtension(Name);
 
-        //}
-        private string[] Extension =
-        {
-            ".1st",".602",".abw",".act",".adoc",".aim",".ans",
-            ".asc",".asc",".ase",".awp",".aww",".bad",".bbs",".bdp",".bdr",
-            ".bean",".bib",".bib",".bibtex",".bml",".bna",".boc",".brx",".btd",
-            ".bzabw",".calca",".charset",".chord",".cnm",".cod",".crwl",".cws",
-            ".cyi",".dgs",".diz",".dne",".doc",".doc",".docm",".docx",".dox",
-            ".dsc",".dvi",".dwd",".dxb",".dxp",".eio",".eit",".emf",".eml",".emlx",
-            ".epp",".err",".err",".etf",".etx",".euc",".fbl",".fcf",".fdf",".fdr",
-            ".fds",".fdt",".fdx",".fdxt",".fft",".fgs",".flr",".fodt",".fountain",
-            ".fpt",".frt",".fwdn",".gmd",".gpd",".gpn",".gsd",".gthr",".gv",".hbk",
-            ".hht",".hs",".hwp",".hwp",".hz",".idx",".iil",".ipf",".ipspot",".jarvis",
-            ".jis",".jnp",".joe",".jp1",".jrtf",".jtd",".kes",".klg",".klg",".knt",
-            ".kon",".kwd",".latex",".lbt",".lis",".lnt",".log",".lp2",".lst",".lst",
-            ".ltr",".ltx",".lue",".luf",".lwp",".lxfml",".lyt",".lyx",".mbox",".mcw",
-            ".txt",".mell",".mellel",".mnt",".msg",".mw",".mwd",".mwp",".nb",".ndoc",
-            ".nfo",".ngloss",".njx",".note",".notes",".now",".nwctxt",".nwm",".nwp",
-            ".ocr",".odif",".odm",".odo",".odt",".ofl",".opeico",".openbsd",".ort",
-            ".ott",".p7s",".pages",".pfx",".plantuml",".pmo",".prt",".prt",".psw",
-            ".pu",".pvm",".pwd",".pwi",".qdl",".qpf",".rad",".readme",".rft",".ris",
-            ".rpt",".rst",".rtd",".rtf",".rtfd",".rtx",".run",".rvf",".rzk",".rzn",
-            ".saf",".safetext",".scc",".scm",".scriv",".scrivx",".sct",".scw",".sdw",
-            ".session",".sgm",".sig",".sla",".gz",".smf",".sms",".ssa",".story",
-            ".strings",".sty",".sxw",".tab",".tab",".tdf",".tdf",".template",
-            ".tex",".text",".thp",".tlb",".tm",".tmd",".tmdx",".tmv",".tmvx",
-            ".tpc",".trelby",".tvj",".txt",".u3i",".unauth",".unx",".uof",".uot",
-            ".upd",".utf8",".utxt",".vct",".vnt",".vw",".wbk",".webdoc",".net",
-            ".wn",".wp",".wp4",".wp5",".wp6",".wp7",".wpa",".wpd",".wpd",".wpd",
-            ".wpl",".wps",".wps",".wpt",".wpt",".wpw",".wri",".wsd",".wtt",".wtx",
-            ".xbdoc",".xbplate",".xdl",".xdl",".xwp",".xwp",".xwp",".xy",".xy3",
-            ".xyp",".xyw",".zabw",".zrtf",".cpp",".c",".cs",".py",".css",".html",
-            ".xml",".json",".text",
-       };
-       
+
 
     }
 }
