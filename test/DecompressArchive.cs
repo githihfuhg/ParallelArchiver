@@ -24,6 +24,7 @@ namespace test
                 Read = read;
                 OutputDir = outputDir;
                 Title = new Title(read);
+                //var files = GetFiles();
                 if (Type() == "dir")
                 {
                     ParallelCreateFiles(false, fileExtension, fileName);
@@ -44,7 +45,12 @@ namespace test
 
         }
 
-        private void ParallelCreateFiles(bool isOneFiele = true, IEnumerable<string> fileName = null, IEnumerable<string> fileExtension = null)
+        public string[] GetFiles()
+        {
+            return Title.GetTitleFiles().Select(tfile => tfile.Name).ToArray();
+        }
+
+        private void ParallelCreateFiles(bool isOneFile = true, IEnumerable<string> fileName = null, IEnumerable<string> fileExtension = null)
         {
             var titles = new List<TFile>();
             var allTitles = Title.GetTitleFiles();
@@ -65,7 +71,7 @@ namespace test
 
             if (fileExtension == null && fileName == null)
             {
-                if (!isOneFiele)
+                if (!isOneFile)
                 {
                     CreateDir();
                 }
@@ -75,7 +81,7 @@ namespace test
             Start(titles);
             var task = titles.Select(t => Task.Run(() =>
             {
-                var fullDir = (isOneFiele || fileName != null || fileExtension != null) ? Path.Combine(OutputDir, t.Name) : Path.Combine(OutputDir, t.FullName);
+                var fullDir = (isOneFile || fileName != null || fileExtension != null) ? Path.Combine(OutputDir, t.Name) : Path.Combine(OutputDir, t.FullName);
                 using (var create = File.Open(fullDir, FileMode.OpenOrCreate, FileAccess.Write))
                 {
 
@@ -171,8 +177,8 @@ namespace test
         {
             string type;
             var buffer = new byte[3];
+            Read.Position = 0;
             Read.Read(buffer, 0, buffer.Length);
-            Read.Seek(-3, SeekOrigin.Current);
             try
             {
                 type = Encoding.UTF8.GetString(buffer);
@@ -181,8 +187,7 @@ namespace test
             {
                 type = "";
             }
-
-
+            Read.Position = 0;
             return type;
         }
 
