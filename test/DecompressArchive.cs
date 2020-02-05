@@ -9,11 +9,21 @@ using System.Threading.Tasks;
 
 namespace test
 {
-    internal class DecompressArchive : ParallelArchiverEvents
+
+
+
+    internal class DecompressArchive /*: ParallelArchiverEvents*/
     {
         private FileStream Read;
         private string OutputDir;
         private Title Title;
+        private ParallelArchiverEvents ParallelArchEvents;
+        //public event EventHandler<ICompressProgress> OnFileCompressProgress;
+        internal DecompressArchive(ParallelArchiverEvents parallelArchiverEvents)
+        {
+            ParallelArchEvents = parallelArchiverEvents;
+        }
+
         public void Decompress(string inputFile, string outputDir, IEnumerable<string> fileExtension = null, IEnumerable<string> fileName = null)
         {
             var timer = new Stopwatch();
@@ -25,11 +35,12 @@ namespace test
                 OutputDir = outputDir;
                 Title = new Title(read);
                 //var files = GetFiles();
-                if (Type() == "dir")
+                var type = Type(read);
+                if (type == "dir")
                 {
                     ParallelCreateFiles(false, fileExtension, fileName);
                 }
-                else if (Type() == "fil")
+                else if (type == "fil")
                 {
                     ParallelCreateFiles();
                 }
@@ -45,9 +56,20 @@ namespace test
 
         }
 
-        public string[] GetFiles()
+        public string[] GetFiles(string path)
         {
-            return Title.GetTitleFiles().Select(tfile => tfile.Name).ToArray();
+            using (var read = new FileInfo(path).OpenRead())
+            {
+                var type  = Type(read);
+                if (type == "fil" || type == "dir")
+                {
+                    return new Title(read).GetTitleFiles().Select(tfile => tfile.Name).ToArray();
+                }
+                else
+                {
+                    throw new Exception("The file is not an archive!!");
+                }
+            }
         }
 
         private void ParallelCreateFiles(bool isOneFile = true, IEnumerable<string> fileName = null, IEnumerable<string> fileExtension = null)
@@ -78,7 +100,7 @@ namespace test
 
                 titles = allTitles;
             }
-            Start(titles);
+            ParallelArchEvents.Start(titles);
             var task = titles.Select(t => Task.Run(() =>
             {
                 var fullDir = (isOneFile || fileName != null || fileExtension != null) ? Path.Combine(OutputDir, t.Name) : Path.Combine(OutputDir, t.FullName);
@@ -98,12 +120,13 @@ namespace test
 
             })).ToArray();
             Task.WaitAll(task);
-            Restart();
+            ParallelArchEvents.Restart();
 
         }
 
         private void DecompressBigFile(FileStream create, TFile tfile)
         {
+            //ProgressCounter progressCounter = new ProgressCounter(tfile);
             byte[] data;
             //var pozition = tfile.PositionInTheStream;
             for (long i = 0, pozEvent = 0, pozition = tfile.PositionInTheStream + 4; i < tfile.BlockCount; i++)
@@ -117,8 +140,7 @@ namespace test
                 DecompreesBlock(create, data, tfile.TypeСompression);
                 pozition += tfile.BlockLength[i] + 4;
                 pozEvent += tfile.BlockLength[i];
-                AddProgressFile(tfile.Name, tfile.BlockLength[i], tfile.FileLength, pozEvent);
-
+                ParallelArchEvents.AddProgressFile(tfile.Name, tfile.BlockLength[i], tfile.FileLength, pozEvent);
             }
         }
         private void DecompressSmallFile(FileStream create, TFile tfile)
@@ -128,9 +150,10 @@ namespace test
             {
                 Read.Position = tfile.PositionInTheStream;
                 Read.Read(data, 0, data.Length);
+                ParallelArchEvents.AddProgressFile(tfile.Name, tfile.FileLength);
             }
             DecompreesBlock(create, data, tfile.TypeСompression);
-            AddProgressFile(tfile.Name, tfile.FileLength);
+           
         }
 
         private void DecompreesBlock(FileStream create, byte[] data, string typeCompression)
@@ -173,12 +196,12 @@ namespace test
             var time = timer.ElapsedMilliseconds;
 
         }
-        private string Type()
+        public string Type(FileStream read)
         {
             string type;
             var buffer = new byte[3];
-            Read.Position = 0;
-            Read.Read(buffer, 0, buffer.Length);
+            read.Position = 0;
+            read.Read(buffer, 0, buffer.Length);
             try
             {
                 type = Encoding.UTF8.GetString(buffer);
@@ -187,18 +210,27 @@ namespace test
             {
                 type = "";
             }
-            Read.Position = 0;
+            read.Position = 0;
             return type;
         }
 
 
 
     }
+
+    //internal interface ICompressProgress
+    //{
+    //    int Procent { get; set; }
+    //    string FileName { get; set; }
+    //    int CurrenFileProcent { get; set; }
+
+    //}
+
+
+    //class ProgressEventArgs/*: ICompressProgress*/
+    //{
+    //    public int Procent { get; set; }
+    //    public string FileName { get; set; }
+    //    public int CurrenFileProcent { get; set; }
+    //}
 }
-
-//ResultStream = resultStream;
-//Title = new Title(resultStream);
-
-//private Title Title;
-//private DirectoryInfo MainDir;
-//private Stream ResultStream;

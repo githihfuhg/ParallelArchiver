@@ -203,7 +203,7 @@ namespace test
             return titleFiles;
         }
     }
-    internal class TFile
+    public class TFile
     {
         public string TypeСompression { get;}
         public int FilePathLength { get; }
@@ -215,7 +215,7 @@ namespace test
         public int[] BlockLength { get; }
 
 
-        public TFile(string typeCompression,int filePathLength, string fullName, string name, long fileLength, long positionInTheStream, int blockCount, int[] blockLength)
+        internal TFile(string typeCompression,int filePathLength, string fullName, string name, long fileLength, long positionInTheStream, int blockCount, int[] blockLength)
         {
             TypeСompression = typeCompression;
             FilePathLength = filePathLength;
@@ -227,14 +227,14 @@ namespace test
             BlockLength = blockLength;
         }
 
-        public TFile(string typeCompression, long fileLength, string fullName)
+        internal TFile(string typeCompression, long fileLength, string fullName)
         {
             TypeСompression = typeCompression;
             FullName = fullName;
             FileLength = fileLength;
             BlockCount = 0;
         }
-        public TFile(string typeCompression, string fullName, int blockCount)
+        internal TFile(string typeCompression, string fullName, int blockCount)
         {
             TypeСompression = typeCompression;
             FileLength = 0;

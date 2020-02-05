@@ -15,9 +15,10 @@ namespace test
         NoCompression,
     }
 
-    internal class CompressArchive : ParallelArchiverEvents
+    internal class CompressArchive
     {
-        private int NumberOfCores { get; } = Environment.ProcessorCount;
+        private ParallelArchiverEvents ParallelArchEvents { get;}
+        private int NumberOfCores { get; }
         public int DegreeOfParallelism { get; set; } = 45;
         private Title Title { get; set; }
         private DirectoryInfo MainDir { get; set; }
@@ -26,7 +27,15 @@ namespace test
         private bool MaximumTxtCompression{ get; set; }
         private bool IsCompressFile { get; set; }
 
-        public void CompressFile(string input, string result, PqzCompressionLevel compressL, bool maximumTxtCompression)
+
+        internal CompressArchive(ParallelArchiverEvents parallelArchiverEvents,
+            PqzCompressionLevel CompressL, bool MaximumTxtCompression)
+        {
+            ParallelArchEvents = parallelArchiverEvents;
+            NumberOfCores = Environment.ProcessorCount;
+        }
+
+        public void CompressFile(string input, string result)
         {
             using (FileStream resultStream = File.Create(result))
             {
@@ -34,16 +43,14 @@ namespace test
                 MainDir = fileInfo.Directory;
                 ResultStream = resultStream;
                 Title = new Title(resultStream);
-                CompressL = compressL;
                 IsCompressFile = true;
-                MaximumTxtCompression = maximumTxtCompression;
                 AddFile(fileInfo);
 
             }
             GC.Collect();
         }
 
-        public void CompressDirectory(string inputDir, string outputDir, PqzCompressionLevel compressL, bool maximumTxtCompression)
+        public void CompressDirectory(string inputDir, string outputDir)
         {
 
             var timer = new Stopwatch();
@@ -53,9 +60,7 @@ namespace test
             {
                 ResultStream = resultStream;
                 Title = new Title(resultStream);
-                CompressL = compressL;
                 IsCompressFile = false;
-                MaximumTxtCompression = maximumTxtCompression;
                 Title.AddTitleDirectories(MainDir);
                 AddFile();
             }
@@ -73,7 +78,7 @@ namespace test
                 new[] { fileInfo };
 
 
-            Start(pathFile);
+            ParallelArchEvents.Start(pathFile);
             //NumberOfFiles = pathFile.Length;
             foreach (var file in pathFile)
             {
@@ -87,7 +92,7 @@ namespace test
                 }
             }
             CompressSmallFile(SmallFile);
-            Restart();
+            ParallelArchEvents.Restart();
             timer.Stop();
             var time = timer.ElapsedMilliseconds;
         }
@@ -108,7 +113,7 @@ namespace test
                     {
                         var bytes = new byte[p];
                         read.Read(bytes, 0, bytes.Length);
-                        AddProgressFile(fileI.Name, bytes.Length, read.Length, read.Position);
+                        ParallelArchEvents.AddProgressFile(fileI.Name, bytes.Length, read.Length, read.Position);
                         return bytes;
 
                     }).Select(x => Task.Run(() => CompressBlock(x,typeCompression))).ToArray();
@@ -123,12 +128,6 @@ namespace test
             var resultDate = data.Select(r => r.Result).ToArray();
             foreach (var res in resultDate)
             {
-                //var cBlockSize = BitConverter.GetBytes(res.Length);
-                //for (int ind = 0; ind < 4; ind++)
-                //{
-                //    res[ind + 4] = cBlockSize[ind]; // костыль
-                //}
-
                 ResultStream.Write(BitConverter.GetBytes(res.Length), 0, 4);
                 ResultStream.Write(res, 0, res.Length);
             }
@@ -155,7 +154,7 @@ namespace test
                 {
                     Title.AddTitleFile(MainDir, IsCompressFile, new TFile(/*"gz"*/typeCompression, CompressFile.Length, file.FullName));
                     ResultStream.Write(CompressFile, 0, CompressFile.Length);
-                    AddProgressFile(file.Name, file.Length);
+                    ParallelArchEvents.AddProgressFile(file.Name, file.Length);
                 }
 
             })).ToArray();
@@ -191,34 +190,6 @@ namespace test
             }
 
         }
-        //private byte[] BrotliCompressByte(byte[] data)
-        //{
-
-        //    using (var compressedStream = new MemoryStream())
-        //    {
-        //        using (var brStream = new BrotliStream(compressedStream, (CompressionLevel)CompressL))
-        //        {
-        //            brStream.Write(data, 0, data.Length);
-        //            brStream.Close();
-        //            return compressedStream.ToArray();
-        //        }
-        //    }
-        //}
-
-        //private byte[] GzCompressByte(byte[] data)
-        //{
-
-        //    using (var compressedStream = new MemoryStream())
-        //    {
-        //        using (var zipStream = new GZipStream(compressedStream, (CompressionLevel)CompressL))
-        //        {
-        //            zipStream.Write(data, 0, data.Length);
-        //            zipStream.Close();
-        //            return compressedStream.ToArray();
-        //        }
-        //    }
-        //}
-
 
         private long[] BalancingBlocks(long fileLength, int blockCount)
         {
@@ -235,11 +206,6 @@ namespace test
             var result = (float)(FileLength / NumberOfCores) / portionLength;
             return DegreeOfParallelism = (result % 10 == 0 || result < 1) ? (int)result + 1 : (int)result;
         }
-
-        //private bool IsText(string Name)
-        //{
-        //    return Extension.Contains(Path.GetExtension(Name));
-        //}
 
         private string TypeCompression(string Name)
         {

@@ -1,71 +1,74 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace test
 {
-    public static class ParallelArchiver
+    public class ParallelArchiver
     {
-
-        public static void CompressFile(string input, string result, PqzCompressionLevel compressL, Action<string, int, int> progressHandler = null, bool maximumTxtCompression = false)
+        public ParallelArchiverEvents ParallelArchiverEvents { get; }
+        private DecompressArchive DecompressArchive { get; set; }
+        private CompressArchive CompressArchive { get; set; }
+        public PqzCompressionLevel CompressLevel { get; set; }
+        public bool MaximumTxtCompression { get; set; }
+        
+        public ParallelArchiver()
         {
-            var compressArch = new CompressArchive();
-            compressArch.Progress += progressHandler;
-            compressArch.CompressFile(input, result, compressL, maximumTxtCompression);
-            compressArch.Progress -= progressHandler;
+            ParallelArchiverEvents = new ParallelArchiverEvents();
+            DecompressArchive = new DecompressArchive(ParallelArchiverEvents);
+            CompressLevel = PqzCompressionLevel.Optimal;
+            MaximumTxtCompression = false;
+        }
+        public void CompressFile(string input, string result)
+        {
+            CompressArchive = new CompressArchive(ParallelArchiverEvents, CompressLevel, MaximumTxtCompression);
+            CompressArchive.CompressFile(input, result);
             GC.Collect();
         }
-        public static async void CompressFileAsync(string input, string result, PqzCompressionLevel compressL, Action<string, int, int> progressHandler = null, bool maximumTxtCompression = false)
+        public async void CompressFileAsync(string input, string result)
         {
             await Task.Run(() =>
             {
-                var compressArch = new CompressArchive();
-                compressArch.Progress += progressHandler;
-                compressArch.CompressFile(input, result, compressL, maximumTxtCompression);
-                compressArch.Progress -= progressHandler;
-
+                CompressArchive = new CompressArchive(ParallelArchiverEvents, CompressLevel, MaximumTxtCompression);
+                CompressArchive.CompressFile(input, result);
             });
             GC.Collect();
         }
 
-        public static void CompressDirectory(string inputDir, string outputDir, PqzCompressionLevel compressL, Action<string, int, int> progressHandler = null, bool maximumTxtCompression = false)
+        public void CompressDirectory(string inputDir, string outputDir)
         {
-            var compressArch = new CompressArchive();
-            compressArch.Progress += progressHandler;
-            compressArch.CompressDirectory(inputDir, outputDir, compressL, maximumTxtCompression);
-            compressArch.Progress -= progressHandler;
+            //var compressArch = new CompressArchive();
+            CompressArchive = new CompressArchive(ParallelArchiverEvents, CompressLevel, MaximumTxtCompression);
+            CompressArchive.CompressDirectory(inputDir, outputDir);
             GC.Collect();
         }
-        public static async void CompressDirectoryAsync(string inputDir, string outputDir, PqzCompressionLevel compressL, Action<string, int, int> progressHandler = null, bool maximumTxtCompression = false)
+        public async void CompressDirectoryAsync(string inputDir, string outputDir)
         {
             await Task.Run(() =>
             {
-                var compressArch = new CompressArchive();
-                compressArch.Progress += progressHandler;
-                compressArch.CompressDirectory(inputDir, outputDir, compressL, maximumTxtCompression);
-                compressArch.Progress -= progressHandler;
+                CompressArchive = new CompressArchive(ParallelArchiverEvents, CompressLevel, MaximumTxtCompression);
+                CompressArchive.CompressDirectory(inputDir, outputDir);
             });
             GC.Collect();
         }
-
-        public static void Decompress(string inputFile, string outputDir, IEnumerable<string> fileExtension = null, IEnumerable<string> fileName = null, Action<string, int, int> progressHandler = null)
+        public void Decompress(string inputFile, string outputDir, IEnumerable<string> fileExtension = null, IEnumerable<string> fileName = null)
         {
-            var decompressArch = new DecompressArchive();
-            decompressArch.Progress += progressHandler;
-            decompressArch.Decompress(inputFile, outputDir, fileExtension, fileName);
-            decompressArch.Progress -= progressHandler;
+            DecompressArchive.Decompress(inputFile, outputDir, fileExtension, fileName);
             GC.Collect();
         }
-        public static async void DecompressAsync(string inputFile, string outputDir, IEnumerable<string> fileExtension = null, IEnumerable<string> fileName = null, Action<string, int, int> progressHandler = null)
+        public async void DecompressAsync(string inputFile, string outputDir, IEnumerable<string> fileExtension = null, IEnumerable<string> fileName = null)
         {
             await Task.Run(() =>
             {
-                var decompressArch = new DecompressArchive();
-                decompressArch.Progress += progressHandler;
-                decompressArch.Decompress(inputFile, outputDir, fileExtension, fileName);
-                decompressArch.Progress -= progressHandler;
+                DecompressArchive.Decompress(inputFile, outputDir, fileExtension, fileName);
             });
             GC.Collect();
+        }
+        public string[] GetFile(string path)
+        {
+            return DecompressArchive.GetFiles(path);
         }
 
     }
