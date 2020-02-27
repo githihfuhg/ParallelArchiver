@@ -15,15 +15,27 @@ namespace ParallelZip
         NoCompression,
     }
 
-    internal class CompressArchive : ParallelArchiverEvents
+    internal class CompressArchive
     {
-        private readonly int NumberOfCores = Environment.ProcessorCount;
-        public int DegreeOfParallelism = 45;
-        private Title Title;
-        private DirectoryInfo MainDir;
-        private FileStream ResultStream;
+        private ParallelArchiverEvents ParallelArchEvents { get; }
+        private int NumberOfCores { get; }
+        public int DegreeOfParallelism { get; set; } = 45;
+        private Title Title { get; set; }
+        private DirectoryInfo MainDir { get; set; }
+        private FileStream ResultStream { get; set; }
+        private PqzCompressionLevel CompressL { get; set; }
+        private bool MaximumTxtCompression { get; set; }
+        private bool IsCompressFile { get; set; }
 
-        public void CompressFile(string input, string result, PqzCompressionLevel compressL)
+
+        internal CompressArchive(ParallelArchiverEvents parallelArchiverEvents,
+            PqzCompressionLevel CompressL, bool MaximumTxtCompression)
+        {
+            ParallelArchEvents = parallelArchiverEvents;
+            NumberOfCores = Environment.ProcessorCount;
+        }
+
+        public void CompressFile(string input, string result)
         {
             using (FileStream resultStream = File.Create(result))
             {
@@ -31,12 +43,14 @@ namespace ParallelZip
                 MainDir = fileInfo.Directory;
                 ResultStream = resultStream;
                 Title = new Title(resultStream);
-                AddFile(compressL, fileInfo);
+                IsCompressFile = true;
+                AddFile(fileInfo);
+
             }
             GC.Collect();
         }
 
-        public void CompressDirectory(string inputDir, string outputDir, PqzCompressionLevel compressL)
+        public void CompressDirectory(string inputDir, string outputDir)
         {
 
             var timer = new Stopwatch();
@@ -46,61 +60,66 @@ namespace ParallelZip
             {
                 ResultStream = resultStream;
                 Title = new Title(resultStream);
+                IsCompressFile = false;
                 Title.AddTitleDirectories(MainDir);
-                AddFile(compressL);
-                resultStream.Dispose();
+                AddFile();
             }
             GC.Collect();
             timer.Stop();
             var time = timer.ElapsedMilliseconds;
         }
-        private void AddFile(PqzCompressionLevel compressL, FileInfo fileInfo = null)
+        private void AddFile(FileInfo fileInfo = null)
         {
             var timer = new Stopwatch();
             timer.Start();
             List<FileInfo> SmallFile = new List<FileInfo>();
-            var pathFile = (fileInfo == null) ?
+            FileInfo[] pathFile = (!IsCompressFile) ?
                 MainDir.EnumerateFiles("*", SearchOption.AllDirectories).ToArray() :
-                new FileInfo[1] { fileInfo };
+                new[] { fileInfo };
 
-            Start(pathFile);
+
+            ParallelArchEvents.Start(pathFile);
             //NumberOfFiles = pathFile.Length;
             foreach (var file in pathFile)
             {
-                if (file.Length >= 52428800)
+                if (file.Length >= 5242880)
                 {
-                    CompressBigFile(file, compressL);
+                    CompressBigFile(file);
                 }
                 else
                 {
                     SmallFile.Add(file);
                 }
             }
-            CompressSmallFile(SmallFile, compressL);
-            Restart();
+            CompressSmallFile(SmallFile);
+            ParallelArchEvents.Restart();
             timer.Stop();
             var time = timer.ElapsedMilliseconds;
         }
 
-        private void CompressBigFile(FileInfo fileInfo, PqzCompressionLevel compressL)
+        private void CompressBigFile(FileInfo fileI)
         {
-            var sizeBlock = BalancingBlocks(fileInfo.Length, SetDegreeOfParallelism(fileInfo.Length));
-            Title.AddTitleFile(MainDir, fileInfo.FullName, fileInfo.Length, DegreeOfParallelism * NumberOfCores, true);
-            using (var read = fileInfo.OpenRead())
+            var sizeBlock = BalancingBlocks(fileI.Length, SetDegreeOfParallelism(fileI.Length));
+            var blockCount = DegreeOfParallelism * NumberOfCores;
+            var typeCompression = TypeCompression(fileI.Name);
+
+            Title.AddTitleFile(MainDir, IsCompressFile, new TFile(typeCompression, fileI.FullName, blockCount));
+
+            using (var read = fileI.OpenRead())
             {
                 for (int i = 0; i < DegreeOfParallelism; i++)
                 {
-                    var date = BalancingBlocks(sizeBlock[i], NumberOfCores).Select(p =>
+                    var data = BalancingBlocks(sizeBlock[i], NumberOfCores).Select(p =>
                     {
                         var bytes = new byte[p];
                         read.Read(bytes, 0, bytes.Length);
-                        AddProgressFile(fileInfo.Name, bytes.Length, read.Length, read.Position);
+                        ParallelArchEvents.AddProgressFile(fileI.Name, bytes.Length, read.Length, read.Position);
                         return bytes;
 
-                    }).Select(x => Task.Run(() => CompressBlock(x, compressL))).ToArray();
+                    }).Select(x => Task.Run(() => CompressBlock(x, typeCompression))).ToArray();
 
-                    Task.WaitAll(date);
-                    WriteFile(date);
+                    Task.WaitAll(data);
+                    WriteFile(data);
                 }
             }
         }
@@ -109,18 +128,14 @@ namespace ParallelZip
             var resultDate = data.Select(r => r.Result).ToArray();
             foreach (var res in resultDate)
             {
-                var cBlockSize = BitConverter.GetBytes(res.Length);
-                for (int ind = 0; ind < 4; ind++)
-                {
-                    res[ind + 4] = cBlockSize[ind]; // костыль
-                }
-
+                ResultStream.Write(BitConverter.GetBytes(res.Length), 0, 4);
                 ResultStream.Write(res, 0, res.Length);
             }
         }
 
 
-        private void CompressSmallFile(List<FileInfo> fileInfo, PqzCompressionLevel compressL)
+
+        private void CompressSmallFile(List<FileInfo> fileInfo)
         {
             var timer = new Stopwatch();
             timer.Start();
@@ -132,49 +147,53 @@ namespace ParallelZip
                 {
                     readFile.Read(buffer, 0, buffer.Length);
                 }
-
-                var CompressFile = CompressBlock(buffer, compressL);
+                var typeCompression = TypeCompression(file.Name);
+                var CompressFile = CompressBlock(buffer, /*"gz"*/typeCompression);
 
                 lock (ResultStream)
                 {
-                    Title.AddTitleFile(MainDir, file.FullName, CompressFile.Length);
+                    Title.AddTitleFile(MainDir, IsCompressFile, new TFile(/*"gz"*/typeCompression, CompressFile.Length, file.FullName));
                     ResultStream.Write(CompressFile, 0, CompressFile.Length);
-                    AddProgressFile(file.Name, file.Length);
+                    ParallelArchEvents.AddProgressFile(file.Name, file.Length);
                 }
 
             })).ToArray();
 
             Task.WaitAll(tasks);
         }
-        private byte[] CompressBlock(byte[] data, PqzCompressionLevel copressL)
+
+        private byte[] CompressBlock(byte[] data, string typeCompression)
         {
+
             using (var compressedStream = new MemoryStream())
             {
-                using (var zipStream = new GZipStream(compressedStream, (CompressionLevel)copressL))
+                if (typeCompression == "gz")
                 {
-                    zipStream.Write(data, 0, data.Length);
-                    zipStream.Close();
-                    return compressedStream.ToArray();
+                    using (var zipStream = new GZipStream(compressedStream, (CompressionLevel)CompressL))
+                    {
+                        zipStream.Write(data, 0, data.Length);
+                        zipStream.Close();
+                        return compressedStream.ToArray();
+                    }
                 }
+                else
+                {
+                    var соmpressL = (MaximumTxtCompression) ? CompressL : PqzCompressionLevel.Fastest;
+                    using (var brStream = new BrotliStream(compressedStream, (CompressionLevel)соmpressL))
+                    {
+                        brStream.Write(data, 0, data.Length);
+
+                        brStream.Close();
+                        return compressedStream.ToArray();
+                    }
+                }
+
             }
+
         }
 
-        //private byte[] CompressByte()
-        //{
-        //    BrotliStream
-        //    using (var compressedStream = new MemoryStream())
-        //    {
-        //        using (var zipStream = new BrotliStream))
-        //        {
-        //            zipStream.Write(data, 0, data.Length);
-        //            zipStream.Close();
-        //            return compressedStream.ToArray();
-        //        }
-        //    }
-        //}
         private long[] BalancingBlocks(long fileLength, int blockCount)
         {
-
             var blocks = Enumerable.Range(0, blockCount).Select(x => fileLength / blockCount).ToArray();
             var Sum = blocks.Sum();
             if (Sum != fileLength)
@@ -188,6 +207,19 @@ namespace ParallelZip
             var result = (float)(FileLength / NumberOfCores) / portionLength;
             return DegreeOfParallelism = (result % 10 == 0 || result < 1) ? (int)result + 1 : (int)result;
         }
+
+        private string TypeCompression(string Name)
+        {
+            return Extension.Contains(Path.GetExtension(Name)) ? "br" : "gz";
+        }
+
+
+        private string[] Extension =
+        {
+            ".txt",".text",".cpp",".c",".cs",".py",".css",".html",
+            ".xml",".json",".text","rtf",".html",".xml",".config",".h"
+        };
+
 
     }
 }

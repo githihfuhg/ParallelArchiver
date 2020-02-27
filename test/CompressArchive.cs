@@ -109,7 +109,7 @@ namespace test
             {
                 for (int i = 0; i < DegreeOfParallelism; i++)
                 {
-                    var date = BalancingBlocks(sizeBlock[i], NumberOfCores).Select(p =>
+                    var data = BalancingBlocks(sizeBlock[i], NumberOfCores).Select(p =>
                     {
                         var bytes = new byte[p];
                         read.Read(bytes, 0, bytes.Length);
@@ -118,8 +118,8 @@ namespace test
 
                     }).Select(x => Task.Run(() => CompressBlock(x,typeCompression))).ToArray();
 
-                    Task.WaitAll(date);
-                    WriteFile(date);
+                    Task.WaitAll(data);
+                    WriteFile(data);
                 }
             }
         }
@@ -182,6 +182,7 @@ namespace test
                     using (var brStream = new BrotliStream(compressedStream,(CompressionLevel)соmpressL))
                     {
                         brStream.Write(data, 0, data.Length);
+
                         brStream.Close();
                         return compressedStream.ToArray();
                     }

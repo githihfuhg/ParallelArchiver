@@ -14,10 +14,10 @@ namespace test
 
     internal class DecompressArchive /*: ParallelArchiverEvents*/
     {
-        private FileStream Read;
-        private string OutputDir;
-        private Title Title;
-        private ParallelArchiverEvents ParallelArchEvents;
+        private FileStream Read { get; set; }
+        private string OutputDir { get; set; }
+        private Title Title { get; set; }
+        private ParallelArchiverEvents ParallelArchEvents { get; set; }
         //public event EventHandler<ICompressProgress> OnFileCompressProgress;
         internal DecompressArchive(ParallelArchiverEvents parallelArchiverEvents)
         {
@@ -218,19 +218,4 @@ namespace test
 
     }
 
-    //internal interface ICompressProgress
-    //{
-    //    int Procent { get; set; }
-    //    string FileName { get; set; }
-    //    int CurrenFileProcent { get; set; }
-
-    //}
-
-
-    //class ProgressEventArgs/*: ICompressProgress*/
-    //{
-    //    public int Procent { get; set; }
-    //    public string FileName { get; set; }
-    //    public int CurrenFileProcent { get; set; }
-    //}
 }

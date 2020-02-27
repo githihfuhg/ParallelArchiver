@@ -63,67 +63,6 @@ namespace test
         }
 
 
-        //public TFile GetTitleFile(/*FileStream stream*/)
-        //{
-        //    var blockCount = 0;
-        //    long positionInTheStream;
-        //    var buffer = new byte[4];
-        //    var blockLength = new long[0];
-        //    Stream.Read(buffer);
-        //    var filePathLength = BitConverter.ToInt32(buffer);
-        //    buffer = new byte[filePathLength];
-        //    Stream.Read(buffer);
-        //    var fullName = Encoding.UTF8.GetString(buffer);
-        //    buffer = new byte[8];
-        //    Stream.Read(buffer);
-        //    var fileLength = BitConverter.ToInt64(buffer);
-        //    if (fileLength == 0)
-        //    {
-        //        Stream.Read(buffer, 0, 4);
-        //        blockCount = BitConverter.ToInt32(buffer);
-        //        Stream.Read(buffer);
-
-        //        positionInTheStream = BitConverter.ToInt64(buffer);
-        //        blockLength = new long[blockCount];
-
-        //        for (int i = 0; i < blockCount; i++)
-        //        {
-        //            Stream.Read(buffer);
-        //            blockLength[i] = BitConverter.ToInt32(buffer, 4);
-        //            fileLength += blockLength[i];
-        //            Stream.Seek(blockLength[i] - 8, SeekOrigin.Current);
-        //        }
-        //    }
-        //    else
-        //    {
-        //        positionInTheStream = BitConverter.ToInt64(buffer);
-        //        Stream.Seek(fileLength, SeekOrigin.Current);
-        //    }
-
-
-        //    return new TFile(filePathLength, fullName, fullName.Substring(fullName.LastIndexOf('\\') + 1), fileLength, positionInTheStream, blockCount, blockLength);
-        //}
-        //public void AddTitleFile(DirectoryInfo mainDir, string typeCompression ,bool IsCompressFile, string fullName,long fileLength = 0, int blockCount = 0/*,*//* bool bigFile = false*/)
-        //{
-        //    //var FileName = Path.Combine(mainDir.Name, fullName.Replace($"{mainDir.FullName}\\", ""));
-        //    if (IsCompressFile)
-        //    {
-        //        Stream.Write(Encoding.UTF8.GetBytes("fil"), 0, 3);
-        //        Stream.Write(BitConverter.GetBytes(Stream.Position + 8),0,8);
-        //    }
-        //    Stream.Write(Encoding.UTF8.GetBytes(typeCompression), 0, 2);
-        //    var fileNameByte = Encoding.UTF8.GetBytes(Path.Combine(mainDir.Name,fullName.Replace($"{mainDir.FullName}\\", "")));
-        //    var FileLength = fileLength;/*(fileLength==0) ? 0 : fileLength;*/
-        //    Stream.Write(BitConverter.GetBytes(fileNameByte.Length), 0, 4);
-        //    Stream.Write(fileNameByte, 0, fileNameByte.Length);
-        //    Stream.Write(BitConverter.GetBytes(FileLength), 0, 8);
-        //    if (fileLength == 0)
-        //    {
-        //        Stream.Write(BitConverter.GetBytes(blockCount), 0, 4);
-        //    }
-        //    Stream.Write(BitConverter.GetBytes(Stream.Position + 8), 0, 8);
-        //}
-
         public void AddTitleFile(DirectoryInfo mainDir,bool IsCompressFile,TFile tFile)
         {
             //var FileName = Path.Combine(mainDir.Name, fullName.Replace($"{mainDir.FullName}\\", ""));
