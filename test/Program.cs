@@ -2,10 +2,6 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.IO.Compression;
-using System.Linq;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 //using SharpCompress.
 
 namespace test
@@ -18,60 +14,94 @@ namespace test
 
         static void Main(string[] args)
         {
-            var timer = new Stopwatch();
-            timer.Start();
-      
-            Console.WriteLine("Введите путь в файлу для его архивации");
-            Console.WriteLine(@"C:\Users\Win10Pro\Desktop\raar\test.mar");
+            var pArh = new ParallelArchiver();
+            string path = "";
 
             try
             {
+                while (true)
+                {
 
-                Async(Console.ReadLine());
+                    Console.Clear();
+                    Console.WriteLine("Выводиь прогресс ? (да/нет)");
+                    if (Console.ReadLine() == "да")
+                    {
+                        pArh.ParallelArchiverEvents.Progress += EvenHandler;
+                    }
+                    else
+                    {
+                        pArh.ParallelArchiverEvents.Progress -= EvenHandler;
+                    }
+
+                    Console.Clear();
+                    Console.WriteLine("1.Aрхивировать файл");
+                    Console.WriteLine("2.Aрхивировать директорию");
+                    Console.WriteLine("3.Распаковать архив");
+
+                    switch (Console.ReadLine())
+                    {
+                        case "1":
+                        {
+                            Console.Clear();
+                            Console.WriteLine("1.Введите путь к файлу");
+                            path = Console.ReadLine();
+                            Timer(() => pArh.CompressFile(path, $"{path}.mar"));
+                            break;
+                        }
+                        case "2":
+                        {
+                            Console.Clear();
+                            Console.WriteLine("1.Введите путь к директории");
+                            path = Console.ReadLine();
+                            Timer(() => pArh.CompressDirectory(path, $"{path}.mar"));
+                            break;
+                        }
+                        case "3":
+                        {
+                            Console.Clear();
+                            Console.WriteLine("1.Введите путь к архиву");
+                            path = Console.ReadLine();
+                            Timer(() => pArh.Decompress(path, Path.GetDirectoryName(path)));
+                            break;
+                        }
+                        default:
+                        {
+                            Console.Clear();
+                            Console.WriteLine("Данные введены некоректно!!");
+                            break;
+                        }
+                        case "exit":
+                        {
+                            return;
+                        }
+
+                    }
+                }
 
             }
             catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
             }
-            timer.Stop();
-            var time = timer.ElapsedMilliseconds;
-
-            //Console.WriteLine(time);
             Console.ReadKey();
-
-
-
-
         }
 
-        private static async void Async(string path)
+        private static void Timer(/*string path,string type*//*Action<string,string,string> action*/Action action)
         {
             var timer = new Stopwatch();
             timer.Start();
-
-        await Task.Run(() =>
-            {
-                
-                var pArh = new ParallelArchiver();
-                pArh.ParallelArchiverEvents.Progress += EvenHandler;
-                //pArh.CompressFile(path, $"{path}.mar");
-                //pArh.CompressDirectory(path, $"{path}.mar");
-                pArh.Decompress(path, Path.GetDirectoryName(path));
-
-
-            });
-            GC.Collect();
+            action();
             timer.Stop();
             var time = timer.ElapsedMilliseconds;
-            Console.WriteLine(time);
+            Console.WriteLine($"Время выполнения {time} мс");
+            Console.ReadKey();
         }
 
         private static void EvenHandler(object sender, ProgressEventArgs e)
         {
             Console.WriteLine($"{e.FileName} - {e.CurrentFileProcent}%   Полный прогресс - {e.FullProgress}%");
         }
-        
+
     }
 
 }
