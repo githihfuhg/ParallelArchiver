@@ -10,8 +10,6 @@ namespace test
 
     class Program
     {
-        private static List<string> Progress = new List<string>();
-
         static void Main(string[] args)
         {
             var pArh = new ParallelArchiver();
@@ -23,7 +21,7 @@ namespace test
                 {
 
                     Console.Clear();
-                    Console.WriteLine("Выводиь прогресс ? (да/нет)");
+                    Console.WriteLine("Выводить прогресс ? (да/нет)");
                     if (Console.ReadLine() == "да")
                     {
                         pArh.ParallelArchiverEvents.Progress += EvenHandler;
