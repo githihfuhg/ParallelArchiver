@@ -29,10 +29,11 @@ namespace ParallelZip
 
 
         internal CompressArchive(ParallelArchiverEvents parallelArchiverEvents,
-            PqzCompressionLevel CompressL, bool MaximumTxtCompression)
+            PqzCompressionLevel compressL, bool maximumTxtCompression)
         {
             ParallelArchEvents = parallelArchiverEvents;
             NumberOfCores = Environment.ProcessorCount;
+            CompressL = compressL;
         }
 
         public void CompressFile(string input, string result)

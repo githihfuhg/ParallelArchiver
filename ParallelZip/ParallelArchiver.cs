@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Buffers;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -24,14 +25,15 @@ namespace ParallelZip
             CompressArchive.CompressFile(input, result);
             GC.Collect();
         }
-        public Task CompressFileAsync(string input, string result)
+        public async Task CompressFileAsync(string input, string result)
         {
-            return Task.Run(() =>
+            await Task.Run(() =>
             {
                 CompressArchive = new CompressArchive(ParallelArchiverEvents, CompressLevel, MaximumTxtCompression);
                 CompressArchive.CompressFile(input, result);
-                GC.Collect();
+                CompressArchive = null;
             });
+            GC.Collect();
         }
 
         public void CompressDirectory(string inputDir, string outputDir)
@@ -40,36 +42,44 @@ namespace ParallelZip
             CompressArchive.CompressDirectory(inputDir, outputDir);
             GC.Collect();
         }
-        public Task CompressDirectoryAsync(string inputDir, string outputDir)
+        public async Task CompressDirectoryAsync(string inputDir, string outputDir)
         {
-            return Task.Run(() =>
+            await Task.Run(() =>
             {
                 CompressArchive = new CompressArchive(ParallelArchiverEvents, CompressLevel, MaximumTxtCompression);
                 CompressArchive.CompressDirectory(inputDir, outputDir);
-                GC.Collect();
+                CompressArchive = null;
             });
+            GC.Collect();
 
         }
         public void Decompress(string inputFile, string outputDir, IEnumerable<string> fileExtension = null, IEnumerable<string> fileName = null)
         {
             DecompressArchive = new DecompressArchive(ParallelArchiverEvents);
             DecompressArchive.Decompress(inputFile, outputDir, fileExtension, fileName);
+            DecompressArchive = null;
             GC.Collect();
         }
-        public Task DecompressAsync(string inputFile, string outputDir, IEnumerable<string> fileExtension = null, IEnumerable<string> fileName = null)
+        public async Task DecompressAsync(string inputFile, string outputDir, IEnumerable<string> fileExtension = null, IEnumerable<string> fileName = null)
         {
-            return Task.Run(() =>
+            await Task.Run(() =>
             {
                 DecompressArchive = new DecompressArchive(ParallelArchiverEvents);
                 DecompressArchive.Decompress(inputFile, outputDir, fileExtension, fileName);
-                GC.Collect();
+                DecompressArchive = null;
             });
+            GC.Collect();
 
         }
         public string[] GetFile(string path)
         {
             DecompressArchive = new DecompressArchive(ParallelArchiverEvents);
             return DecompressArchive.GetFiles(path);
+        }
+
+        public async Task<string[]> GetFileAsync(string path)
+        {
+            return await Task.Run(() => GetFile(path));
         }
 
     }

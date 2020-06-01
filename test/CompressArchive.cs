@@ -29,10 +29,11 @@ namespace test
 
 
         internal CompressArchive(ParallelArchiverEvents parallelArchiverEvents,
-            PqzCompressionLevel CompressL, bool MaximumTxtCompression)
+            PqzCompressionLevel compressL, bool maximumTxtCompression)
         {
             ParallelArchEvents = parallelArchiverEvents;
             NumberOfCores = Environment.ProcessorCount;
+            CompressL = compressL;
         }
 
         public void CompressFile(string input, string result)
@@ -159,7 +160,7 @@ namespace test
 
             })).ToArray();
 
-            Task.WaitAll(tasks);
+            Task.WaitAll(tasks); ///123
         }
 
         private byte[] CompressBlock(byte[] data, string typeCompression)
