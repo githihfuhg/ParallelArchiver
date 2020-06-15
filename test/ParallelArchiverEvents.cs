@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace test
 {
@@ -21,6 +22,8 @@ namespace test
                 CurrentFileProcent = (streamReadLength > 0 && streamReadPosition > 0) ? (int)(streamReadPosition * 100 / streamReadLength) : 100,
                 FullProgress = (int)(Counter * 100 / AllFilesLength)
             });
+           
+            
         }
 
         internal void Start(IEnumerable<FileInfo> fileInfo)

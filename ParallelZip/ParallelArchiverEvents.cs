@@ -2,10 +2,9 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
-namespace ParallelZip
+namespace test
 {
 
     public class ParallelArchiverEvents
@@ -23,6 +22,8 @@ namespace ParallelZip
                 CurrentFileProcent = (streamReadLength > 0 && streamReadPosition > 0) ? (int)(streamReadPosition * 100 / streamReadLength) : 100,
                 FullProgress = (int)(Counter * 100 / AllFilesLength)
             });
+           
+            
         }
 
         internal void Start(IEnumerable<FileInfo> fileInfo)

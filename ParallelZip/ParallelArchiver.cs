@@ -1,9 +1,10 @@
 ﻿using System;
-using System.Buffers;
 using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 
-namespace ParallelZip
+namespace test
 {
     public class ParallelArchiver
     {
@@ -12,7 +13,7 @@ namespace ParallelZip
         private CompressArchive CompressArchive { get; set; }
         public PqzCompressionLevel CompressLevel { get; set; }
         public bool MaximumTxtCompression { get; set; }
-
+        
         public ParallelArchiver()
         {
             ParallelArchiverEvents = new ParallelArchiverEvents();
@@ -31,7 +32,6 @@ namespace ParallelZip
             {
                 CompressArchive = new CompressArchive(ParallelArchiverEvents, CompressLevel, MaximumTxtCompression);
                 CompressArchive.CompressFile(input, result);
-                CompressArchive = null;
             });
             GC.Collect();
         }
@@ -40,7 +40,6 @@ namespace ParallelZip
         {
             CompressArchive = new CompressArchive(ParallelArchiverEvents, CompressLevel, MaximumTxtCompression);
             CompressArchive.CompressDirectory(inputDir, outputDir);
-            GC.Collect();
         }
         public async Task CompressDirectoryAsync(string inputDir, string outputDir)
         {
@@ -48,16 +47,13 @@ namespace ParallelZip
             {
                 CompressArchive = new CompressArchive(ParallelArchiverEvents, CompressLevel, MaximumTxtCompression);
                 CompressArchive.CompressDirectory(inputDir, outputDir);
-                CompressArchive = null;
             });
             GC.Collect();
-
         }
         public void Decompress(string inputFile, string outputDir, IEnumerable<string> fileExtension = null, IEnumerable<string> fileName = null)
         {
             DecompressArchive = new DecompressArchive(ParallelArchiverEvents);
             DecompressArchive.Decompress(inputFile, outputDir, fileExtension, fileName);
-            DecompressArchive = null;
             GC.Collect();
         }
         public async Task DecompressAsync(string inputFile, string outputDir, IEnumerable<string> fileExtension = null, IEnumerable<string> fileName = null)
@@ -66,10 +62,8 @@ namespace ParallelZip
             {
                 DecompressArchive = new DecompressArchive(ParallelArchiverEvents);
                 DecompressArchive.Decompress(inputFile, outputDir, fileExtension, fileName);
-                DecompressArchive = null;
             });
             GC.Collect();
-
         }
         public string[] GetFile(string path)
         {

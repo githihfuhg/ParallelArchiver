@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.IO.Compression;
 using System.Linq;
 using System.Text;
 
-namespace ParallelZip
+namespace test
 {
     internal class Title
     {
@@ -16,9 +17,9 @@ namespace ParallelZip
             Stream = stream;
         }
 
-        public void AddTitleDirectories(DirectoryInfo mainDir, bool oneFile = false)
+        public void AddTitleDirectories(DirectoryInfo mainDir,bool oneFile = false)
         {
-            var directories =/* (oneFile) ? new List<DirectoryInfo>() :*/ mainDir.EnumerateDirectories("*", SearchOption.AllDirectories).ToList();
+            var directories = mainDir.EnumerateDirectories("*", SearchOption.AllDirectories).ToList();
             directories.Add(mainDir);
             Stream.Write(Encoding.UTF8.GetBytes("dir"), 0, 3);
             Stream.Seek(8, SeekOrigin.Current);
@@ -51,7 +52,7 @@ namespace ParallelZip
             for (var i = 0; i < DirCount; i++)
             {
                 bufer = new byte[4];
-                Stream.Read(bufer, 0, 4);
+                Stream.Read(bufer,0,4);
                 var filePathLength = BitConverter.ToInt32(bufer, 0);
                 bufer = new byte[filePathLength];
                 Stream.Read(bufer, 0, filePathLength);
@@ -62,9 +63,8 @@ namespace ParallelZip
         }
 
 
-        public void AddTitleFile(DirectoryInfo mainDir, bool IsCompressFile, TFile tFile)
+        public void AddTitleFile(DirectoryInfo mainDir,bool IsCompressFile,TFile tFile)
         {
-            //var FileName = Path.Combine(mainDir.Name, fullName.Replace($"{mainDir.FullName}\\", ""));
             if (IsCompressFile)
             {
                 Stream.Write(Encoding.UTF8.GetBytes("fil"), 0, 3);
@@ -99,7 +99,7 @@ namespace ParallelZip
                 var blockLength = new int[0];
                 buffer = new byte[4];
                 Stream.Read(buffer, 0, 2);
-                var typeCompression = Encoding.UTF8.GetString(buffer, 0, 2);
+                var typeCompression = Encoding.UTF8.GetString(buffer,0,2);
                 Stream.Read(buffer, 0, 4);
                 var filePathLength = BitConverter.ToInt32(buffer, 0);
                 buffer = new byte[filePathLength];
@@ -115,19 +115,15 @@ namespace ParallelZip
 
                     Stream.Read(buffer, 0, 8);
                     positionInTheStream = BitConverter.ToInt64(buffer, 0);
-                    blockLength = new int[BlockCount];
+                    blockLength = new int [BlockCount];
                     for (int i = 0; i < BlockCount; i++)
                     {
 
                         Stream.Read(buffer, 0, 4);
                         blockLength[i] = BitConverter.ToInt32(buffer, 0);
                         fileLength += blockLength[i];
-                        Stream.Seek(blockLength[i], SeekOrigin.Current);
+                        Stream.Seek(blockLength[i] , SeekOrigin.Current);
 
-                        //Stream.Read(buffer, 0, 8);
-                        //blockLength[i] = BitConverter.ToInt32(buffer, 4);
-                        //fileLength += blockLength[i];
-                        //Stream.Seek(blockLength[i] - 8, SeekOrigin.Current);
                     }
                 }
                 else
@@ -136,14 +132,21 @@ namespace ParallelZip
                     positionInTheStream = BitConverter.ToInt64(buffer, 0);
                     Stream.Seek(fileLength, SeekOrigin.Current);
                 }
-                titleFiles.Add(new TFile(typeCompression, filePathLength, fullName, fullName.Substring(fullName.LastIndexOf('\\') + 1), fileLength, positionInTheStream, BlockCount, blockLength));
+                titleFiles.Add(
+                    new TFile(typeCompression,filePathLength, 
+                        fullName,
+                    fullName.Substring(fullName.LastIndexOf('\\') + 1), 
+                        fileLength, 
+                        positionInTheStream, 
+                        BlockCount,
+                        blockLength));
             }
             return titleFiles;
         }
     }
     public class TFile
     {
-        public string TypeСompression { get; }
+        public string TypeСompression { get;}
         public int FilePathLength { get; }
         public string FullName { get; }
         public string Name { get; }
@@ -153,7 +156,7 @@ namespace ParallelZip
         public int[] BlockLength { get; }
 
 
-        internal TFile(string typeCompression, int filePathLength, string fullName, string name, long fileLength, long positionInTheStream, int blockCount, int[] blockLength)
+        internal TFile(string typeCompression,int filePathLength, string fullName, string name, long fileLength, long positionInTheStream, int blockCount, int[] blockLength)
         {
             TypeСompression = typeCompression;
             FilePathLength = filePathLength;
@@ -184,7 +187,7 @@ namespace ParallelZip
 
     internal class TDirectories
     {
-        public int FilePathLength { get; }
+        public int FilePathLength { get;}
         public string FileName { get; }
 
         public TDirectories(int filePathLength, string fileName)

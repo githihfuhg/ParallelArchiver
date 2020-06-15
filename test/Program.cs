@@ -30,7 +30,6 @@ namespace test
                     {
                         pArh.ParallelArchiverEvents.Progress -= EvenHandler;
                     }
-
                     Console.Clear();
                     Console.WriteLine("1.Aрхивировать файл");
                     Console.WriteLine("2.Aрхивировать директорию");
@@ -43,6 +42,13 @@ namespace test
                             Console.Clear();
                             Console.WriteLine("1.Введите путь к файлу");
                             path = Console.ReadLine();
+                            Console.WriteLine("Использовать сверхсжатие для текстовых документов ? (да/нет)");
+                            if (Console.ReadLine() == "да")
+                            {
+                                pArh.MaximumTxtCompression = true;
+                                pArh.CompressLevel = PqzCompressionLevel.Optimal;
+                            }
+                            else { pArh.MaximumTxtCompression = false; }
                             Timer(() => pArh.CompressFile(path, $"{path}.mar"));
                             break;
                         }
@@ -51,6 +57,12 @@ namespace test
                             Console.Clear();
                             Console.WriteLine("1.Введите путь к директории");
                             path = Console.ReadLine();
+                            Console.WriteLine("Использовать сверхсжатие для текстовых документов ? (да/нет)");
+                            if (Console.ReadLine() == "да")
+                            {
+                                pArh.MaximumTxtCompression = true;
+                                pArh.CompressLevel = PqzCompressionLevel.Optimal;
+                            }
                             Timer(() => pArh.CompressDirectory(path, $"{path}.mar"));
                             break;
                         }
@@ -84,7 +96,7 @@ namespace test
             Console.ReadKey();
         }
 
-        private static void Timer(/*string path,string type*//*Action<string,string,string> action*/Action action)
+        private static void Timer(Action action)
         {
             var timer = new Stopwatch();
             timer.Start();

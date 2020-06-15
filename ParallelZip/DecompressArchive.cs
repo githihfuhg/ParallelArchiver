@@ -7,8 +7,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ParallelZip
+namespace test
 {
+
+
 
     internal class DecompressArchive /*: ParallelArchiverEvents*/
     {
@@ -16,7 +18,6 @@ namespace ParallelZip
         private string OutputDir { get; set; }
         private Title Title { get; set; }
         private ParallelArchiverEvents ParallelArchEvents { get; set; }
-        //public event EventHandler<ICompressProgress> OnFileCompressProgress;
         internal DecompressArchive(ParallelArchiverEvents parallelArchiverEvents)
         {
             ParallelArchEvents = parallelArchiverEvents;
@@ -58,7 +59,7 @@ namespace ParallelZip
         {
             using (var read = new FileInfo(path).OpenRead())
             {
-                var type = Type(read);
+                var type  = Type(read);
                 if (type == "fil" || type == "dir")
                 {
                     return new Title(read).GetTitleFiles().Select(tfile => tfile.Name).ToArray();
@@ -124,9 +125,9 @@ namespace ParallelZip
 
         private void DecompressBigFile(FileStream create, TFile tfile)
         {
-            //ProgressCounter progressCounter = new ProgressCounter(tfile);
+            
             byte[] data;
-            //var pozition = tfile.PositionInTheStream;
+       
             for (long i = 0, pozEvent = 0, pozition = tfile.PositionInTheStream + 4; i < tfile.BlockCount; i++)
             {
                 lock (Read)
@@ -138,7 +139,10 @@ namespace ParallelZip
                 DecompreesBlock(create, data, tfile.TypeСompression);
                 pozition += tfile.BlockLength[i] + 4;
                 pozEvent += tfile.BlockLength[i];
+              
                 ParallelArchEvents.AddProgressFile(tfile.Name, tfile.BlockLength[i], tfile.FileLength, pozEvent);
+               
+                
             }
         }
         private void DecompressSmallFile(FileStream create, TFile tfile)
@@ -148,10 +152,10 @@ namespace ParallelZip
             {
                 Read.Position = tfile.PositionInTheStream;
                 Read.Read(data, 0, data.Length);
-                ParallelArchEvents.AddProgressFile(tfile.Name, tfile.FileLength);
             }
             DecompreesBlock(create, data, tfile.TypeСompression);
-
+            ParallelArchEvents.AddProgressFile(tfile.Name, tfile.FileLength);
+            
         }
 
         private void DecompreesBlock(FileStream create, byte[] data, string typeCompression)
@@ -217,10 +221,3 @@ namespace ParallelZip
     }
 
 }
-
-//ResultStream = resultStream;
-//Title = new Title(resultStream);
-
-//private Title Title;
-//private DirectoryInfo MainDir;
-//private Stream ResultStream;

@@ -19,7 +19,7 @@ namespace test
 
         public void AddTitleDirectories(DirectoryInfo mainDir,bool oneFile = false)
         {
-            var directories =/* (oneFile) ? new List<DirectoryInfo>() :*/ mainDir.EnumerateDirectories("*", SearchOption.AllDirectories).ToList();
+            var directories = mainDir.EnumerateDirectories("*", SearchOption.AllDirectories).ToList();
             directories.Add(mainDir);
             Stream.Write(Encoding.UTF8.GetBytes("dir"), 0, 3);
             Stream.Seek(8, SeekOrigin.Current);
@@ -65,7 +65,6 @@ namespace test
 
         public void AddTitleFile(DirectoryInfo mainDir,bool IsCompressFile,TFile tFile)
         {
-            //var FileName = Path.Combine(mainDir.Name, fullName.Replace($"{mainDir.FullName}\\", ""));
             if (IsCompressFile)
             {
                 Stream.Write(Encoding.UTF8.GetBytes("fil"), 0, 3);
@@ -125,10 +124,6 @@ namespace test
                         fileLength += blockLength[i];
                         Stream.Seek(blockLength[i] , SeekOrigin.Current);
 
-                        //Stream.Read(buffer, 0, 8);
-                        //blockLength[i] = BitConverter.ToInt32(buffer, 4);
-                        //fileLength += blockLength[i];
-                        //Stream.Seek(blockLength[i] - 8, SeekOrigin.Current);
                     }
                 }
                 else
@@ -137,7 +132,14 @@ namespace test
                     positionInTheStream = BitConverter.ToInt64(buffer, 0);
                     Stream.Seek(fileLength, SeekOrigin.Current);
                 }
-                titleFiles.Add(new TFile(typeCompression,filePathLength, fullName, fullName.Substring(fullName.LastIndexOf('\\') + 1), fileLength, positionInTheStream, BlockCount, blockLength));
+                titleFiles.Add(
+                    new TFile(typeCompression,filePathLength, 
+                        fullName,
+                    fullName.Substring(fullName.LastIndexOf('\\') + 1), 
+                        fileLength, 
+                        positionInTheStream, 
+                        BlockCount,
+                        blockLength));
             }
             return titleFiles;
         }

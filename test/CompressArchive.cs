@@ -31,6 +31,7 @@ namespace test
         internal CompressArchive(ParallelArchiverEvents parallelArchiverEvents,
             PqzCompressionLevel compressL, bool maximumTxtCompression)
         {
+            MaximumTxtCompression = maximumTxtCompression;
             ParallelArchEvents = parallelArchiverEvents;
             NumberOfCores = Environment.ProcessorCount;
             CompressL = compressL;
@@ -80,7 +81,7 @@ namespace test
 
 
             ParallelArchEvents.Start(pathFile);
-            //NumberOfFiles = pathFile.Length;
+        
             foreach (var file in pathFile)
             {
                 if (file.Length >= 5242880)
@@ -116,7 +117,6 @@ namespace test
                         read.Read(bytes, 0, bytes.Length);
                         ParallelArchEvents.AddProgressFile(fileI.Name, bytes.Length, read.Length, read.Position);
                         return bytes;
-
                     }).Select(x => Task.Run(() => CompressBlock(x,typeCompression))).ToArray();
 
                     Task.WaitAll(data);
@@ -149,18 +149,18 @@ namespace test
                     readFile.Read(buffer, 0, buffer.Length);
                 }
                 var typeCompression = TypeCompression(file.Name);
-                var CompressFile = CompressBlock(buffer, /*"gz"*/typeCompression);
+                var CompressFile = CompressBlock(buffer,typeCompression);
                
                 lock (ResultStream)
                 {
-                    Title.AddTitleFile(MainDir, IsCompressFile, new TFile(/*"gz"*/typeCompression, CompressFile.Length, file.FullName));
+                    Title.AddTitleFile(MainDir, IsCompressFile, new TFile(typeCompression, CompressFile.Length, file.FullName));
                     ResultStream.Write(CompressFile, 0, CompressFile.Length);
                     ParallelArchEvents.AddProgressFile(file.Name, file.Length);
                 }
 
             })).ToArray();
 
-            Task.WaitAll(tasks); ///123
+            Task.WaitAll(tasks);
         }
 
         private byte[] CompressBlock(byte[] data, string typeCompression)
@@ -183,7 +183,6 @@ namespace test
                     using (var brStream = new BrotliStream(compressedStream,(CompressionLevel)соmpressL))
                     {
                         brStream.Write(data, 0, data.Length);
-
                         brStream.Close();
                         return compressedStream.ToArray();
                     }
@@ -218,7 +217,7 @@ namespace test
         private string[] Extension =
         {
             ".txt",".text",".cpp",".c",".cs",".py",".css",".html",
-            ".xml",".json",".text","rtf",".html",".xml",".config",".h"
+            ".xml",".json",".text","rtf",".html",".xml",".config",".h",".conf",".ddl"
         };
 
 
