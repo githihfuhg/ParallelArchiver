@@ -1,0 +1,22 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ArrArchiverLib", "ArrArchiverLib\ArrArchiverLib.csproj", "{32414D7B-8023-4845-B65C-12E411647271}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ArchiverTest", "ArchiverTest\ArchiverTest.csproj", "{20F7DEA0-9BF5-4576-9E54-6595D03F3AD0}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{32414D7B-8023-4845-B65C-12E411647271}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{32414D7B-8023-4845-B65C-12E411647271}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{32414D7B-8023-4845-B65C-12E411647271}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{32414D7B-8023-4845-B65C-12E411647271}.Release|Any CPU.Build.0 = Release|Any CPU
+		{20F7DEA0-9BF5-4576-9E54-6595D03F3AD0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{20F7DEA0-9BF5-4576-9E54-6595D03F3AD0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{20F7DEA0-9BF5-4576-9E54-6595D03F3AD0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{20F7DEA0-9BF5-4576-9E54-6595D03F3AD0}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal

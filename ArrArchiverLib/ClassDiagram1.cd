@@ -1,0 +1,172 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Class Name="ArrArchiverLib.Archiver.Archiver" BaseTypeListCollapsed="true">
+    <Position X="6.25" Y="4" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAgEAAAQgAAQAAAAAAAAEAAAAQAAAAAAIGAAAA=</HashCode>
+      <FileName>Archiver\Archiver.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.716" Collapsed="true" />
+  </Class>
+  <Class Name="ArrArchiverLib.Compressor.Models.CompressorSettings">
+    <Position X="8.25" Y="6" Width="2" />
+    <TypeIdentifier>
+      <HashCode>AAAAAABACAAAAACAAAAAAAQAAAAAAAAQAAIAAAAAAAA=</HashCode>
+      <FileName>Compressor\CompressorSettings.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="ArrArchiverLib.Compressor.Compressor" BaseTypeListCollapsed="true">
+    <Position X="10.75" Y="2.5" Width="2" />
+    <TypeIdentifier>
+      <HashCode>AAAiAEAAAABAECAACAAAAAAAEAAAAACAgAAgAAAgAAA=</HashCode>
+      <FileName>Compressor\Compressor.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="ArrArchiverLib.Decompressor.Decompressor" BaseTypeListCollapsed="true">
+    <Position X="13" Y="2.5" Width="2" />
+    <TypeIdentifier>
+      <HashCode>AAAAAgAgAAAAAABACAAAAAQBAAAAAAAAgAAgAAAggAA=</HashCode>
+      <FileName>Decompressor\Decompressor.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="ArrArchiverLib.Exceptions.ArchiveException">
+    <Position X="15" Y="6.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Exceptions\ArchiveException.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="ArrArchiverLib.Extensions.IEnumerableExtensions">
+    <Position X="10.5" Y="7" Width="2" />
+    <TypeIdentifier>
+      <HashCode>AQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Extensions\EnumerableExtensions.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="ArrArchiverLib.Metadata.Models.ArchiveInfo">
+    <Position X="17.5" Y="5.25" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>hAAAAAAAACBAAAAAgAAAAAAAgAAAAAAAAAAAAAAEAEA=</HashCode>
+      <FileName>Metadata\Models\ArchiveInfo.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="ArrArchiverLib.Metadata.Models.ChunkHeader">
+    <Position X="17.5" Y="3.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAgAAAAAAAAAAAAAEAAAAAAAAAAAAAAEA=</HashCode>
+      <FileName>Metadata\Models\ChunkHeader.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="ArrArchiverLib.Metadata.Models.DirectoryHeader">
+    <Position X="16" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>CEAAAAAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAEA=</HashCode>
+      <FileName>Metadata\Models\DirectoryHeader.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="ArrArchiverLib.Metadata.Models.FileHeader">
+    <Position X="17.75" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>CEAAAEAAACAAAABwAAAAAAAAAABAAAAAAAAAAAAABEA=</HashCode>
+      <FileName>Metadata\Models\FileHeader.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="ArrArchiverLib.Metadata.Metadata" BaseTypeListCollapsed="true">
+    <Position X="8.25" Y="2.5" Width="2.25" />
+    <TypeIdentifier>
+      <HashCode>AAAAAIAAAAAKAAAAAQAAAAAQAAgAAAAAAAAAAAFAAAA=</HashCode>
+      <FileName>Metadata\Metadata.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="ArrArchiverLib.Progress.ArchiveProgress" BaseTypeListCollapsed="true">
+    <Position X="13.25" Y="6.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAACAABAAAAAAAAAAAAAAABAAIAAAAAAAAFAA=</HashCode>
+      <FileName>Progress\ArchiveProgress.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="ArrArchiverLib.Progress.ArchiveProgressEventArgs">
+    <Position X="15.25" Y="2.5" Width="2" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAIAAIAAAAAAAAAAAAAAAAAAABAAAAAAABAAAA=</HashCode>
+      <FileName>Progress\ArchiveProgressEventArgs.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="ArrArchiverLib.Resources.ArchiveResource" Collapsed="true">
+    <Position X="15" Y="8" Width="2" />
+    <TypeIdentifier>
+      <HashCode>AAAAAABAAAAAAAAAABABEAAAAQAAAAAAAAAAAAAAAIA=</HashCode>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="ArrArchiverLib.Resources.ExceptionResource" Collapsed="true">
+    <Position X="17.25" Y="8" Width="2" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAEAAAABEABAAQIAACAAAAAAAAAAAIA=</HashCode>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="ArrArchiverLib.Streams.ArchiveStream">
+    <Position X="4.5" Y="0.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAIAAAAAAAAAAAAAFAAAAAAAAAAAAA=</HashCode>
+      <FileName>Streams\ArchiveStream.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="ArrArchiverLib.Streams.ArchiveStreamBase">
+    <Position X="1" Y="0.75" Width="3" />
+    <Compartments>
+      <Compartment Name="Fields" Collapsed="true" />
+      <Compartment Name="Properties" Collapsed="true" />
+    </Compartments>
+    <TypeIdentifier>
+      <HashCode>AAkIAgADBCAFdSbgWgAUAEBgACBAAUAIAAIEggEIADQ=</HashCode>
+      <FileName>Streams\ArchiveStreamBase.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Interface Name="ArrArchiverLib.Archiver.IArchiver">
+    <Position X="6.25" Y="0.75" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAgEAAAQgAAQAAAAAAAAEAAAAQAAAAAAIEAAAA=</HashCode>
+      <FileName>Archiver\IArchiver.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="ArrArchiverLib.Compressor.ICompressor">
+    <Position X="10.75" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAACAAAAAAAAAAAAAAAAAAAAAAAAAAAAgAAAAAAAAAA=</HashCode>
+      <FileName>Compressor\ICompressor.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="ArrArchiverLib.Decompressor.IDecompressor">
+    <Position X="12.5" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAgAAAAAAAAAAAAAAAAAAAAAAAAAAgAAAAAAAAAA=</HashCode>
+      <FileName>Decompressor\IDecompressor.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="ArrArchiverLib.Metadata.IMetadata">
+    <Position X="8.25" Y="0.5" Width="2.25" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAQAAAAAQAAgAAAAAAAAAAABAAAA=</HashCode>
+      <FileName>Metadata\IMetadata.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="ArrArchiverLib.Progress.IArchiveProgress">
+    <Position X="14.25" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAACAABAAAAAAAAAAAAAAAAAAAAAAAAAAABAA=</HashCode>
+      <FileName>Progress\IArchiveProgress.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Enum Name="ArrArchiverLib.Compressor.CompressionType">
+    <Position X="15.25" Y="4.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAIBAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Metadata\Models\CompressionType.cs</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Font Name="Segoe UI" Size="9" />
+</ClassDiagram>

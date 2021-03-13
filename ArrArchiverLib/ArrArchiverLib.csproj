@@ -1,0 +1,36 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>netstandard2.1</TargetFramework>
+        <LangVersion>9</LangVersion>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <EmbeddedResource Update="Resources\ExceptionResource.resx">
+        <Generator>ResXFileCodeGenerator</Generator>
+        <LastGenOutput>ExceptionResource.Designer.cs</LastGenOutput>
+      </EmbeddedResource>
+      <EmbeddedResource Update="Resources\ArchiveResource.resx">
+        <Generator>ResXFileCodeGenerator</Generator>
+        <LastGenOutput>ArchiveResource.Designer.cs</LastGenOutput>
+      </EmbeddedResource>
+    </ItemGroup>
+
+    <ItemGroup>
+      <Compile Update="Resources\ExceptionResource.Designer.cs">
+        <DesignTime>True</DesignTime>
+        <AutoGen>True</AutoGen>
+        <DependentUpon>ExceptionResource.resx</DependentUpon>
+      </Compile>
+      <Compile Update="Resources\ArchiveResource.Designer.cs">
+        <DesignTime>True</DesignTime>
+        <AutoGen>True</AutoGen>
+        <DependentUpon>ArchiveResource.resx</DependentUpon>
+      </Compile>
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="NeoSmart.AsyncLock" Version="3.0.1" />
+    </ItemGroup>
+
+</Project>
